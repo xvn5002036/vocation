@@ -13,7 +13,7 @@ import { LU_OPTIONS, RANK_SYSTEM } from './constants/rank';
 import { MARSHAL_TITLES, STEM_MARSHALS } from './constants/marshals_meta';
 import { MARSHAL_DATA_STATIC } from './constants/marshals_data';
 
-// 將輸入組件移出，解決手機端鍵盤消失問題
+// 輸入組件移出主組件，修復焦點失去與鍵盤消失問題
 const InputSection = ({ formData, setFormData, handleStart }) => (
   <div className="max-w-xl mx-auto bg-slate-800/50 p-6 rounded-2xl border border-slate-700 backdrop-blur-sm shadow-xl">
     <div className="text-center mb-6">
@@ -146,42 +146,41 @@ const App = () => {
     return { stem, branch, name: `${stem}${branch}`, element: STEM_ELEMENT[stem] };
   };
 
-  // 核心古籍演算邏輯修正
   const handleStart = () => {
     if (!formData.name || !formData.birthYear) { alert("請完整輸入法名與出生年份"); return; }
     
+    // 獲取年命干支
     const gz = getGanZhiYear(parseInt(formData.birthYear));
-    const zodiac = gz.branch; 
-    const starInfo = ZODIAC_MAPPING[zodiac]; // 依地支準確獲取本命星君
     
-    // 1. 治所對應修正 (根據 mapping.js 的正確欄位 zhi, region)
+    // 1. 治所精確抓取：依據甲子年命
     const zhiData = JIAZI_ZHI_MAPPING[gz.name] || JIAZI_ZHI_MAPPING["甲子"];
     
-    // 2. 職官分配修正：依據本命星君的 roleType (admin/warrior/judge)
+    // 2. 本命星君精確抓取：依據地支
+    const starInfo = ZODIAC_MAPPING[gz.branch]; 
+    
+    // 3. 職銜分配：根據星君 roleType 決定對應職官屬性 (admin:0, warrior:1, judge:2)
+    const roleIdx = starInfo.roleType === 'admin' ? 0 : (starInfo.roleType === 'warrior' ? 1 : 2);
     const rankKey = Object.keys(RANK_SYSTEM).find(key => RANK_SYSTEM[key].label === formData.rank) || "dugong";
     const rankData = RANK_SYSTEM[rankKey];
     
-    // 決定索引：admin -> 0, warrior -> 1, judge -> 2
-    const roleIdx = starInfo.roleType === 'admin' ? 0 : (starInfo.roleType === 'warrior' ? 1 : 2);
     const appoint = rankData.appoints[formData.gender][roleIdx];
-    const office = rankData.offices[roleIdx % rankData.offices.length];
+    const office = rankData.offices[roleIdx];
 
-    // 3. 元帥分配：優先手選，否則依天干所屬部隊中選擇與星君屬性最契合者
+    // 4. 元帥分配：優先手選，否則依天干所屬五行部隊選取
     let mId = formData.selectedMarshalId;
     if (!mId) {
-      const marshalPool = STEM_MARSHALS[gz.stem] || STEM_MARSHALS["甲"];
-      // 依 roleType 選擇部隊中的職位
+      const marshalPool = STEM_MARSHALS[gz.stem];
       mId = marshalPool[roleIdx % marshalPool.length];
     }
     
     const marshalInfo = MARSHAL_DATA_STATIC[mId];
-    // 獲取該元帥在 MARSHAL_TITLES 中的具體職務描述
-    const marshalTitleData = MARSHAL_TITLES[mId]?.find(t => t.type === starInfo.roleType) || MARSHAL_TITLES[mId]?.[0];
+    // 獲取具體神位職稱
+    const mTitleData = MARSHAL_TITLES[mId]?.find(t => t.type === starInfo.roleType) || MARSHAL_TITLES[mId]?.[0];
 
     setResult({
       gz, zhiInfo: zhiData, rankData, appoint, office,
       marshalInfo, 
-      variantDesc: marshalTitleData?.desc || "護壇大將",
+      variantDesc: mTitleData?.desc || "護壇大將",
       starInfo,
       correlation: STEM_CORRELATION[gz.stem],
       powers: rankData.powers
@@ -232,7 +231,7 @@ const App = () => {
                   <div className="space-y-4 text-sm md:text-base border-b md:border-b-0 md:border-r border-yellow-600/10 pb-4 md:pr-4">
                     <p className="flex items-center gap-3"><User className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">授籙信士：</span> {formData.name}</p>
                     <p className="flex items-center gap-3"><Compass className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">年命干支：</span> {result.gz.name}年 ({result.gz.element})</p>
-                    <p className="flex items-center gap-3"><MapPin className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">本命治所：</span> {result.zhiInfo.zhi}</p>
+                    <p className="flex items-center gap-3"><MapPin className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">本命治所：</span> {result.zhiInfo.name} ({result.zhiInfo.location})</p>
                     <p className="flex items-center gap-3"><Sparkles className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">所配壇靖：</span> {result.zhiInfo.tan} / {result.zhiInfo.jing}</p>
                   </div>
                   <div className="space-y-4">
@@ -243,9 +242,6 @@ const App = () => {
                       <p className="text-xl font-bold text-yellow-500">{result.appoint}</p>
                     </div>
                   </div>
-                </div>
-                <div className="bg-slate-950/50 p-4 rounded border border-yellow-600/10 text-xs italic text-slate-400">
-                  「依據{result.correlation.direction}方{result.correlation.color}帝{result.correlation.qi}炁之法力，授以此籙，統御鬼神。」
                 </div>
               </div>
             ) : (
@@ -260,8 +256,11 @@ const App = () => {
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-slate-800/50 p-5 rounded-xl border border-slate-700">
-                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Info className="w-4 h-4" /> 神蹟典籍故事</h4>
-                    <p className="text-slate-300 text-xs leading-relaxed">{result.marshalInfo.intro}</p>
+                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Info className="w-4 h-4" /> 神蹟與職稱</h4>
+                    <p className="text-slate-300 text-xs leading-relaxed mb-3">{result.marshalInfo.intro}</p>
+                    <div className="p-2 bg-slate-900/50 rounded border border-yellow-600/20 text-[11px] text-yellow-600/80 italic">
+                      鑑察：{result.variantDesc}
+                    </div>
                   </div>
                   <div className="bg-slate-800/80 p-5 rounded-xl border-2 border-yellow-600/20 shadow-inner">
                     <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Flame className="w-4 h-4" /> 專屬修持法門</h4>
