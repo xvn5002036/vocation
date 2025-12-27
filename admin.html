@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>華光馬元帥金磚法奧義書・終極版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            850: '#1c1917',
+                            900: '#0c0a09',
+                            950: '#040302',
+                        },
+                        amber: {
+                            450: '#f59e0b',
+                            550: '#d97706', 
+                        },
+                        cinnabar: '#E11D48', // Rose 600-ish
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'serif'],
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0c0a09; /* Stone 900 */
+            color: #d6d3d1; /* Stone 300 */
+        }
+        h1, h2, h3, .serif {
+            font-family: 'Noto Serif TC', serif;
+        }
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1c1917; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #44403c; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #57534e; 
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        .gold-text {
+            color: #fbbf24; /* Amber 400 */
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+        }
+        .cinnabar-text {
+            color: #f43f5e; /* Rose 500 */
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
+        }
+        .nav-item.active {
+            border-bottom: 2px solid #fbbf24;
+            color: #fbbf24;
+        }
+        .ritual-card {
+            background-color: #1c1917;
+            border: 1px solid #292524;
+            transition: all 0.3s ease;
+        }
+        .ritual-card:hover {
+            border-color: #78350f; /* Amber 900 */
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(217, 119, 6, 0.1);
+        }
+        .hand-seal-box {
+            border: 1px dashed #44403c;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+        }
+    </style>
+    <!-- Chosen Palette: [Mystic Gold & Cinnabar] - Dark mode for esoteric feel. 
+         Stone 900 background, Amber 400 (Gold) highlights, Rose 500 (Cinnabar) for action/warnings. -->
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-stone-950 border-b border-stone-800 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 flex items-center justify-center border-2 border-amber-600 rotate-45">
+                        <div class="w-4 h-4 bg-amber-600 -rotate-45"></div>
+                    </div>
+                    <div>
+                        <div class="text-amber-500 font-bold text-xl serif tracking-wider">華光奧義書</div>
+                        <div class="text-[10px] text-stone-500 uppercase tracking-widest">終極詳解版</div>
+                    </div>
+                </div>
+                
+                <!-- Desktop Nav -->
+                <div class="hidden lg:flex space-x-8 text-sm font-medium">
+                    <button onclick="switchView('intro')" class="nav-item active py-5 hover:text-amber-400 transition">入門總綱</button>
+                    <button onclick="switchView('rituals')" class="nav-item py-5 hover:text-amber-400 transition">請神與起壇</button>
+                    <button onclick="switchView('artifacts')" class="nav-item py-5 hover:text-amber-400 transition">法器與手訣</button>
+                    <button onclick="switchView('combat')" class="nav-item py-5 hover:text-amber-400 transition">實戰應用</button>
+                    <button onclick="switchView('emergency')" class="nav-item py-5 hover:text-amber-400 transition">急難權變</button>
+                    <button onclick="switchView('spells')" class="nav-item py-5 hover:text-amber-400 transition">咒語庫</button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="lg:hidden text-stone-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-stone-900 border-t border-stone-800">
+            <div class="flex flex-col p-4 space-y-2">
+                <button onclick="switchView('intro')" class="text-left px-4 py-3 rounded hover:bg-stone-800">入門總綱</button>
+                <button onclick="switchView('rituals')" class="text-left px-4 py-3 rounded hover:bg-stone-800">請神與起壇</button>
+                <button onclick="switchView('artifacts')" class="text-left px-4 py-3 rounded hover:bg-stone-800">法器與手訣</button>
+                <button onclick="switchView('combat')" class="text-left px-4 py-3 rounded hover:bg-stone-800">實戰應用 (招財/斬桃花)</button>
+                <button onclick="switchView('emergency')" class="text-left px-4 py-3 rounded hover:bg-stone-800">急難權變 (徒手/無道具)</button>
+                <button onclick="switchView('spells')" class="text-left px-4 py-3 rounded hover:bg-stone-800">咒語庫</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        
+        <!-- View: Intro -->
+        <section id="intro" class="view-section space-y-8 animate-fade-in">
+            <div class="border-l-4 border-amber-600 pl-6 py-2">
+                <h1 class="text-3xl md:text-4xl font-bold text-stone-100 serif">華光馬元帥金磚法</h1>
+                <p class="text-amber-500 mt-2 font-serif">龍虎山正一派授錄法師專用・火部兵馬總集</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="ritual-card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-stone-200 mb-4 border-b border-stone-700 pb-2">📜 傳承核心</h3>
+                    <ul class="space-y-3 text-stone-400 text-sm">
+                        <li class="flex items-start"><span class="text-amber-500 mr-2">✦</span> <strong>主帥：</strong>五顯靈官馬靈耀 (華光大帝)</li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-2">✦</span> <strong>屬性：</strong>南方火德，雷火之精，主速度與威勢。</li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-2">✦</span> <strong>核心法器：</strong>三角金磚 (雷擊木/黃銅)，火鴉兵馬。</li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-2">✦</span> <strong>必修內功：</strong>三昧真火採氣，每日午時 (11:00-13:00)。</li>
+                    </ul>
+                </div>
+                
+                <div class="ritual-card p-6 rounded-lg flex flex-col justify-center items-center text-center">
+                    <div class="w-16 h-16 border-2 border-red-600 rounded-full flex items-center justify-center mb-4 text-2xl animate-pulse">🔥</div>
+                    <h3 class="text-lg font-bold text-stone-200">今日法師狀態檢測</h3>
+                    <p class="text-xs text-stone-500 mt-2">請每日自省：身心是否清淨？午時是否採氣？</p>
+                    <div class="mt-4 w-full bg-stone-800 rounded-full h-2.5">
+                        <div class="bg-amber-600 h-2.5 rounded-full" style="width: 100%"></div>
+                    </div>
+                    <p class="text-xs text-amber-500 mt-1">法力充盈</p>
+                </div>
+            </div>
+
+             <div class="ritual-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-stone-200 mb-4">🧘 內修：午時採氣引導</h3>
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    <div class="relative w-64 h-64 bg-stone-900 rounded-full flex items-center justify-center border border-stone-800 shadow-[0_0_30px_rgba(217,119,6,0.1)]">
+                         <canvas id="breathCanvas" width="256" height="256"></canvas>
+                         <div class="absolute text-center">
+                             <div id="breathText" class="text-xl font-bold text-stone-300">準備</div>
+                             <div class="text-xs text-stone-500">三昧真火</div>
+                         </div>
+                    </div>
+                    <div class="flex-1 space-y-4">
+                        <p class="text-sm text-stone-400">每日午時，面向正南。吸氣時觀想南方火紅熱氣入心，呼氣時引導至丹田或法器。</p>
+                        <button id="toggleBreath" class="px-6 py-2 bg-amber-700 hover:bg-amber-600 text-white rounded transition">開始修練</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Rituals (Start) -->
+        <section id="rituals" class="view-section hidden space-y-8">
+            <h2 class="text-3xl font-bold text-stone-100 serif border-b border-stone-700 pb-4">請神與起壇秘奧</h2>
+            
+            <!-- Timing Checker -->
+            <div class="ritual-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-amber-500 mb-4">📅 擇吉起壇：天時檢測</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-stone-500 mb-1">選擇日期</label>
+                        <input type="date" id="dateInput" class="w-full bg-stone-800 border border-stone-600 rounded px-3 py-2 text-stone-200 focus:border-amber-500 focus:outline-none">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="checkDate()" class="w-full bg-stone-700 hover:bg-stone-600 text-stone-200 px-4 py-2 rounded transition">分析吉凶</button>
+                    </div>
+                    <div class="bg-stone-900 p-3 rounded border border-stone-800 flex items-center justify-center">
+                        <span id="dateResult" class="text-sm text-stone-400">請輸入日期...</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-xs text-stone-500">
+                    <p><strong>大吉：</strong>天赦、甲子、三合、成/開日、丙丁巳午日（火日）。</p>
+                    <p class="text-red-500"><strong>大凶（切勿起壇）：</strong>歲破、月破、三煞、楊公忌日。</p>
+                </div>
+            </div>
+
+            <!-- Invocation Steps -->
+            <div class="space-y-6">
+                <div class="border-l-2 border-red-600 pl-4">
+                    <h3 class="text-2xl font-bold text-stone-100">卷首之首：請神必降四部曲</h3>
+                    <p class="text-stone-500 text-sm mt-1">若不按此儀軌，來的恐是路邊遊魂。</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="ritual-card p-5 rounded-lg">
+                        <span class="text-red-500 font-bold text-4xl opacity-20 absolute right-4 top-2">01</span>
+                        <h4 class="text-lg font-bold text-stone-200 mb-2">淨壇隔穢 (清場)</h4>
+                        <p class="text-sm text-stone-400">劍指虛畫「井」字（天羅地網），右腳跺地。</p>
+                        <div class="mt-2 p-2 bg-stone-900 rounded text-xs text-amber-500 font-serif">
+                            「一淨天，二淨地，三淨人，四淨鬼。壇場內外悉令清淨！敕！」
+                        </div>
+                    </div>
+                    
+                    <div class="ritual-card p-5 rounded-lg">
+                        <span class="text-red-500 font-bold text-4xl opacity-20 absolute right-4 top-2">02</span>
+                        <h4 class="text-lg font-bold text-stone-200 mb-2">發遞奏摺 (通令)</h4>
+                        <p class="text-sm text-stone-400">燒黃紙（奏），手掐「發兵訣」（雙手劍指胸前交叉成X）。</p>
+                        <div class="mt-2 p-2 bg-stone-900 rounded text-xs text-amber-500 font-serif">
+                            「太上三五都功經籙...弟子[法名]，謹請主帥降臨。急急如律令！」
+                        </div>
+                    </div>
+
+                    <div class="ritual-card p-5 rounded-lg">
+                        <span class="text-red-500 font-bold text-4xl opacity-20 absolute right-4 top-2">03</span>
+                        <h4 class="text-lg font-bold text-stone-200 mb-2">主帥降臨 (鎖定)</h4>
+                        <p class="text-sm text-stone-400">掐「靈官訣」置眉心，存思南方火光炸裂，馬帥金身降落壇前。</p>
+                        <div class="mt-2 p-2 bg-stone-900 rounded text-xs text-amber-500 font-serif">
+                            唸《華光召請神咒》，最後用靈官訣虛點金磚三下。
+                        </div>
+                    </div>
+
+                    <div class="ritual-card p-5 rounded-lg">
+                        <span class="text-red-500 font-bold text-4xl opacity-20 absolute right-4 top-2">04</span>
+                        <h4 class="text-lg font-bold text-stone-200 mb-2">驗證 (擲筊)</h4>
+                        <p class="text-sm text-stone-400">「弟子[全銜]恭請聖駕，若已到請賜聖卦。」</p>
+                        <ul class="mt-2 text-xs text-stone-400 space-y-1">
+                            <li><span class="text-green-500">聖卦(一正一反)：</span> 神到，辦事。</li>
+                            <li><span class="text-yellow-500">笑卦(兩平)：</span> 未到或不急，重請。</li>
+                            <li><span class="text-red-500">陰卦(兩凸)：</span> 拒絕或有煞，淨壇謝罪。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Artifacts & Hand Seals -->
+        <section id="artifacts" class="view-section hidden space-y-8">
+            <h2 class="text-3xl font-bold text-stone-100 serif border-b border-stone-700 pb-4">五寶法器與手訣</h2>
+
+            <!-- Hand Seals Tabs -->
+            <div class="ritual-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-stone-200 mb-4">✋ 關鍵手訣圖解庫</h3>
+                <div class="flex space-x-2 overflow-x-auto mb-4 pb-2 border-b border-stone-700">
+                    <!-- Added data-key attributes for robust JS selection -->
+                    <button class="seal-tab active px-3 py-1 text-sm text-amber-500 border-b-2 border-amber-500" data-key="lingguan" onclick="showSeal('lingguan')">靈官訣</button>
+                    <button class="seal-tab px-3 py-1 text-sm text-stone-400 hover:text-stone-200" data-key="fantian" onclick="showSeal('fantian')">翻天印</button>
+                    <button class="seal-tab px-3 py-1 text-sm text-stone-400 hover:text-stone-200" data-key="brick" onclick="showSeal('brick')">金磚訣</button>
+                    <button class="seal-tab px-3 py-1 text-sm text-stone-400 hover:text-stone-200" data-key="snake" onclick="showSeal('snake')">盤蛇印</button>
+                    <button class="seal-tab px-3 py-1 text-sm text-stone-400 hover:text-stone-200" data-key="shako" onclick="showSeal('shako')">煞扣</button>
+                </div>
+
+                <div id="seal-content" class="min-h-[150px]">
+                    <!-- Dynamic Content -->
+                </div>
+            </div>
+
+            <!-- Artifacts Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="ritual-card p-5">
+                    <h4 class="text-lg font-bold text-amber-500 mb-2">1. 七星劍 (斬/令)</h4>
+                    <p class="text-sm text-stone-400">步北斗罡，掐劍訣。用途：斬斷惡煞、破邪法結界、號令雷部。</p>
+                </div>
+                <div class="ritual-card p-5">
+                    <h4 class="text-lg font-bold text-amber-500 mb-2">2. 鐵鞭/金鐧 (刑/罰)</h4>
+                    <p class="text-sm text-stone-400">手掐「煞扣」。用途：鎮壓拷打，威攝鬼神，打得皮開肉綻不傷魂。</p>
+                </div>
+                <div class="ritual-card p-5">
+                    <h4 class="text-lg font-bold text-amber-500 mb-2">3. 五營令旗 (調/度)</h4>
+                    <p class="text-sm text-stone-400">本門特例：以<strong class="text-red-500">紅旗(南方)</strong>為主帥旗調動馬帥親兵。黃旗統調五營。</p>
+                </div>
+                <div class="ritual-card p-5">
+                    <h4 class="text-lg font-bold text-amber-500 mb-2">4. 照妖寶鏡 (照/破)</h4>
+                    <p class="text-sm text-stone-400">吸日月精華。用途：照破妖邪原形，懸掛門楣反射風水煞氣。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Combat (Applications) -->
+        <section id="combat" class="view-section hidden space-y-10">
+            <h2 class="text-3xl font-bold text-stone-100 serif border-b border-stone-700 pb-4">實戰應用：解厄、招財、情緣</h2>
+
+            <!-- Group 1: Wealth & Shop -->
+            <div class="space-y-4">
+                <h3 class="text-2xl font-bold text-amber-500 serif">💰 招財與守庫秘法</h3>
+                
+                <!-- Shop Wealth -->
+                <div class="ritual-card p-6 rounded-lg border-l-4 border-amber-600">
+                    <h4 class="text-xl font-bold text-stone-200">店鋪安鎮招財法</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div class="text-sm text-stone-400">
+                            <p class="mb-2"><strong class="text-stone-200">核心：</strong>接引地氣。適合實體店鋪。</p>
+                            <p class="mb-2"><strong class="text-stone-200">位置：</strong>明財位（大門入內對角線）。</p>
+                            <p class="mb-2"><strong class="text-stone-200">佈局：</strong>安放金磚（字頭朝大門），下壓黃紙（寫符或咒）。</p>
+                            <p><strong class="text-stone-200">咒語：</strong>「土能生白玉，地可出黃金。五方土地神，助我運財金。吾奉華光敕令！安！」</p>
+                        </div>
+                        <div class="bg-stone-900 p-4 rounded text-xs text-stone-500">
+                            <div class="flex justify-between mb-2"><span>門開左</span> <span>財位在右對角</span></div>
+                            <div class="flex justify-between mb-2"><span>門開右</span> <span>財位在左對角</span></div>
+                            <div class="flex justify-between"><span>門開中</span> <span>左右對角皆可</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- White Snake Vault -->
+                <div class="ritual-card p-6 rounded-lg border-l-4 border-amber-600">
+                    <h4 class="text-xl font-bold text-stone-200">白蛇盤庫法 (防止漏財)</h4>
+                    <p class="text-sm text-stone-400 mt-2">
+                        利用蛇性「盤踞」與「幽暗」特質，鎖住財庫（保險箱/收銀機）。<br>
+                        <span class="text-amber-500">操作：</span>手掐盤蛇印，觀想白蛇順時針盤繞財庫九圈，蛇頭對外警戒。敕令封門。<br>
+                        <span class="text-red-400">應變：</span>若員工流動大，採「認職/信物不認人」法，在隱蔽處貼紅點為記，宣告凡持信物者為自己人。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Group 2: Love & Relationships -->
+            <div class="space-y-4">
+                <h3 class="text-2xl font-bold text-pink-600 serif">🌸 情緣與斬桃花</h3>
+                
+                <!-- Cut Peach Blossom -->
+                <div class="ritual-card p-6 rounded-lg border-l-4 border-pink-700">
+                    <h4 class="text-xl font-bold text-stone-200">茅山水碗剪刀斷桃花</h4>
+                    <div class="mt-4 text-sm text-stone-400 space-y-2">
+                        <p><strong>原理：</strong>金剋木（剪刀斷情絲），水斷流。</p>
+                        <p><strong>作法：</strong></p>
+                        <ol class="list-decimal list-inside pl-2 space-y-1">
+                            <li>紅線打七個死結（象徵糾纏）。</li>
+                            <li>放入陰陽水中。</li>
+                            <li>持咒：「陰陽剪刀斷情義...」。</li>
+                            <li>水中剪斷紅線，每剪一下喝「斷！」。</li>
+                            <li>潑水送煞（不可回頭），剪刀壓香爐/金磚下淨化。</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- White Snake Bind -->
+                <div class="ritual-card p-6 rounded-lg border-l-4 border-pink-700">
+                    <h4 class="text-xl font-bold text-stone-200">白蛇鎖心法 (和合/追債)</h4>
+                    <p class="text-sm text-stone-400 mt-2">
+                        <strong>原理：</strong>蛇性纏繞，至死方休。用紙蛇與對方照片/替身用白線纏繞。<br>
+                        <strong>訣竅：</strong>和合求「纏綿」，追債求「勒緊」。<br>
+                        <strong>供養：</strong>生雞蛋一顆。事成化送（都市可敲破蛋液入水溝，殼丟棄）。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Group 3: Exorcism & Legal -->
+            <div class="space-y-4">
+                <h3 class="text-2xl font-bold text-red-600 serif">⚔️ 驅邪與化官司</h3>
+                
+                <!-- White Tiger -->
+                <div class="ritual-card p-6 rounded-lg border-l-4 border-red-800">
+                    <h4 class="text-xl font-bold text-stone-200">金磚壓白虎 (化官司刑罰)</h4>
+                    <div class="mt-4 text-sm text-stone-400">
+                        <p class="mb-2"><strong>佈局：</strong>黃紙書「白虎口舌官司煞神」，上置生雞蛋（虎口）。</p>
+                        <p class="mb-2"><strong>行法：</strong>手持金磚，觀想為火紅大山，口唸敕令，重壓而下。</p>
+                        <ul class="list-disc list-inside pl-2 text-stone-500">
+                            <li><span class="text-stone-300">極凶局：</span> 當場擊碎雞蛋（破虎口），蛋液包好丟十字路口。</li>
+                            <li><span class="text-stone-300">一般局：</span> 金磚壓紙七日。</li>
+                            <li><span class="text-red-400">誤觸解法：</span> 若觸蛋液（煞氣），立用陰陽水洗手，過火淨化。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Emergency -->
+        <section id="emergency" class="view-section hidden space-y-8">
+            <div class="bg-stone-900 border border-red-900 p-8 rounded-lg shadow-[0_0_20px_rgba(220,38,38,0.2)]">
+                <h2 class="text-3xl font-bold text-red-500 serif mb-6">🚑 急難權變與徒手行法</h2>
+                <p class="text-stone-400 mb-6">當身邊無法器、不擇日時之救命絕技。</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- No Time -->
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-stone-200">時間緊迫：偷天換日法</h3>
+                        <p class="text-sm text-stone-500">若遇大凶日（非歲破）需辦急事。</p>
+                        <div class="bg-black p-4 rounded text-sm text-stone-300">
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li>點七柱香，向四方拜，唸「百無禁忌咒」。</li>
+                                <li>用<strong>紅布</strong>蓋住金磚/神像。</li>
+                                <li>隔布掐雷訣虛畫諱字。</li>
+                                <li>猛然揭開紅布，大喝<strong>「光！」</strong>（以此火光破時煞）。</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- No Tools -->
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-stone-200">身無長物：人體法壇</h3>
+                        <ul class="space-y-3 text-sm text-stone-400">
+                            <li>
+                                <strong class="text-amber-500">心香一瓣：</strong> 
+                                雙手合掌微虛（心香印），存思心火化為清香通天。
+                            </li>
+                            <li>
+                                <strong class="text-amber-500">虛空金磚：</strong> 
+                                掐金磚訣，吸南方氣，存思手中握有沈重發燙金磚。喝「打」！
+                            </li>
+                            <li>
+                                <strong class="text-amber-500">氣化兵馬：</strong> 
+                                舌頂上顎，存思火氣入肺。猛力吹氣（或啐），觀想化為無數火鴉。
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Travel/Driving -->
+                    <div class="col-span-1 md:col-span-2 mt-4 pt-4 border-t border-stone-800">
+                         <h3 class="text-xl font-bold text-stone-200 mb-2">🚗 風火輪神行法 (開車/趕路)</h3>
+                         <p class="text-sm text-stone-400 mb-2">
+                             趕時間、走夜路、避險阻。
+                             <span class="text-xs text-stone-500 block">(坐姿可用腳趾抓地代替跺腳)</span>
+                         </p>
+                         <div class="flex gap-4 text-sm">
+                             <div class="flex-1 bg-stone-800 p-3 rounded">
+                                 <span class="text-red-500 font-bold">左腳：</span> 跺地/抓地，唸「左輪生風」。
+                             </div>
+                             <div class="flex-1 bg-stone-800 p-3 rounded">
+                                 <span class="text-red-500 font-bold">右腳：</span> 跺地/抓地，唸「右輪噴火」。
+                             </div>
+                         </div>
+                         <p class="text-xs text-stone-500 mt-2">觀想：腳底/車輪化為火輪，雙目怒視前方，勢如破竹。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Spells -->
+        <section id="spells" class="view-section hidden space-y-6">
+            <h2 class="text-3xl font-bold text-stone-100 serif mb-6">咒語寶典</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-stone-800 p-4 rounded border border-stone-700">
+                    <h4 class="text-amber-500 font-bold mb-2">請神總咒</h4>
+                    <p class="text-sm text-stone-400 font-serif">奉請南方火德星，五顯靈官馬天君...弟子一心專拜請，華光大帝速降靈！</p>
+                </div>
+                <div class="bg-stone-800 p-4 rounded border border-stone-700">
+                    <h4 class="text-amber-500 font-bold mb-2">金磚祭煉咒</h4>
+                    <p class="text-sm text-stone-400 font-serif">金磚煉火，無堅不摧。上打妖魔，下鎮鬼魅。吾奉華光大帝律令！敕！</p>
+                </div>
+                <div class="bg-stone-800 p-4 rounded border border-stone-700">
+                    <h4 class="text-amber-500 font-bold mb-2">火鴉咒</h4>
+                    <p class="text-sm text-stone-400 font-serif">天靈靈，地靈靈，奉請華光大元帥，親點火鴉百萬千...神兵火急如律令！打！</p>
+                </div>
+                <div class="bg-stone-800 p-4 rounded border border-stone-700">
+                    <h4 class="text-amber-500 font-bold mb-2">白蛇密咒</h4>
+                    <p class="text-sm text-stone-400 font-serif">白蛇將軍，獨角通靈...鑽入某某心竅...不聽吾令，金磚火焚！敕！</p>
+                </div>
+                <div class="bg-stone-800 p-4 rounded border border-stone-700">
+                    <h4 class="text-amber-500 font-bold mb-2">解結咒 (斷桃花)</h4>
+                    <p class="text-sm text-stone-400 font-serif">解結解結解冤結，前生冤債今生裂...一刀兩斷各西東...敕！</p>
+                </div>
+                <div class="bg-stone-800 p-4 rounded border border-stone-700">
+                    <h4 class="text-amber-500 font-bold mb-2">百無禁忌咒</h4>
+                    <p class="text-sm text-stone-400 font-serif">日吉時良，天地開張...年煞月煞，避向路旁...開！開！開！</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-800 text-stone-400 py-6 mt-auto">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>道高龍虎伏，德重鬼神欽。法術雖靈，切勿仗法欺人。</p>
+            <p class="mt-2 text-xs">華光法脈傳承資料整理</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Hand Seal Data ---
+        const seals = {
+            'lingguan': {
+                title: '靈官訣 (玉樞火指)',
+                desc: '請神、發令專用。',
+                steps: [
+                    '中指用力伸直豎立(天線)。',
+                    '食指、無名指、小指捲曲緊握入掌。',
+                    '大拇指指尖重掐中指指甲(點火)。',
+                    '置於眉心前方，感應指尖熱流。'
+                ]
+            },
+            'fantian': {
+                title: '翻天印 (泰山印)',
+                desc: '鎮壓、封印專用。',
+                steps: [
+                    '右手五指併攏，掌心向下。',
+                    '手腕下壓，手指微翹。',
+                    '掌心用力內凹(含氣)。',
+                    '如蓋印章般重重下壓。'
+                ]
+            },
+            'brick': {
+                title: '金磚訣 (虛空化形)',
+                desc: '無實體金磚時使用。',
+                steps: [
+                    '右手五指伸直，掌心向上。',
+                    '大拇指壓住無名指與小指指甲。',
+                    '食指中指伸直併攏托物狀。',
+                    '觀想掌心托著發光沈重的金磚。'
+                ]
+            },
+            'snake': {
+                title: '盤蛇印',
+                desc: '白蛇盤庫守財專用。',
+                steps: [
+                    '雙手手指交叉互握。',
+                    '手指內扣手背，但掌心拱起留空(藏寶)。',
+                    '雙大拇指併攏，向上翹起如蛇頭。'
+                ]
+            },
+            'shako': {
+                title: '煞扣 (握煞訣)',
+                desc: '握兵器、鎖煞氣用。',
+                steps: [
+                    '大拇指橫向用力壓住中指與無名指指甲。',
+                    '其餘手指自然握拳包住大拇指(或大拇指在外壓指，視習慣，重點是鎖住)。',
+                    '意念鎖住手中煞氣不外洩。'
+                ]
+            }
+        };
+
+        function showSeal(key) {
+            const data = seals[key];
+            const content = document.getElementById('seal-content');
+            
+            // Highlight tabs
+            document.querySelectorAll('.seal-tab').forEach(btn => {
+                if (btn.dataset.key === key) {
+                    btn.classList.remove('text-stone-400');
+                    btn.classList.add('active', 'text-amber-500', 'border-b-2', 'border-amber-500');
+                } else {
+                    btn.classList.remove('active', 'text-amber-500', 'border-b-2', 'border-amber-500');
+                    btn.classList.add('text-stone-400');
+                }
+            });
+
+            if (!data) return; // Guard clause
+
+            content.innerHTML = `
+                <div class="animate-fade-in mt-4">
+                    <h4 class="text-xl font-bold text-stone-200 mb-2">${data.title}</h4>
+                    <p class="text-stone-500 mb-4 text-sm">${data.desc}</p>
+                    <div class="hand-seal-box text-stone-300 text-sm">
+                        <ol class="list-decimal list-inside space-y-2">
+                            ${data.steps.map(s => `<li>${s}</li>`).join('')}
+                        </ol>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Date Checker Logic ---
+        function checkDate() {
+            const input = document.getElementById('dateInput').value;
+            const resultDiv = document.getElementById('dateResult');
+            
+            if(!input) {
+                resultDiv.innerHTML = '<span class="text-stone-500">請選擇日期</span>';
+                return;
+            }
+
+            // Simple simulation for demo purposes
+            // In a real app, this would need a Lunar Calendar library
+            const date = new Date(input);
+            const day = date.getDate();
+            
+            // Simulate random auspicious/inauspicious for demo
+            // Real logic: Check Stem/Branch, Clash with Year/Month
+            const mockRandom = (day % 4); 
+            
+            let html = '';
+            if (mockRandom === 0) {
+                html = '<span class="text-green-500 font-bold">大吉 (三合/成日)</span> - 宜起壇、請神。';
+            } else if (mockRandom === 1) {
+                html = '<span class="text-red-500 font-bold">凶 (歲破/三煞)</span> - 忌起壇，需用「急難權變法」。';
+            } else if (mockRandom === 2) {
+                html = '<span class="text-amber-500 font-bold">平</span> - 無沖無合，可辦事。';
+            } else {
+                 html = '<span class="text-green-500 font-bold">上吉 (天赦日)</span> - 百無禁忌，萬事大吉。';
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+
+        // --- Breath Animation ---
+        let breathAnim;
+        function initBreath() {
+            const canvas = document.getElementById('breathCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const text = document.getElementById('breathText');
+            let size = 50;
+            let growing = true;
+            let active = false;
+
+            document.getElementById('toggleBreath').onclick = function() {
+                active = !active;
+                this.textContent = active ? "停止修練" : "開始修練";
+                this.classList.toggle('bg-red-700');
+                if(!active) {
+                    text.innerHTML = '準備<br><span class="text-xs text-stone-500">三昧真火</span>';
+                    size = 50;
+                    draw();
+                } else {
+                    loop();
+                }
+            };
+
+            function draw() {
+                ctx.clearRect(0, 0, 256, 256);
+                const center = 128;
+                
+                // Fire Glow
+                const grad = ctx.createRadialGradient(center, center, size/2, center, center, size);
+                grad.addColorStop(0, 'rgba(245, 158, 11, 0.8)'); // Amber
+                grad.addColorStop(1, 'rgba(220, 38, 38, 0)');   // Red Fade
+
+                ctx.beginPath();
+                ctx.arc(center, center, size, 0, Math.PI*2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                // Core
+                ctx.beginPath();
+                ctx.arc(center, center, 10, 0, Math.PI*2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+            }
+
+            function loop() {
+                if(!active) return;
+                
+                if(growing) {
+                    size += 0.5;
+                    text.innerHTML = '吸氣<br><span class="text-xs text-amber-500">採南方火</span>';
+                    if(size > 110) growing = false;
+                } else {
+                    size -= 0.5;
+                    text.innerHTML = '呼氣<br><span class="text-xs text-red-500">歸入丹田</span>';
+                    if(size < 50) growing = true;
+                }
+                draw();
+                requestAnimationFrame(loop);
+            }
+            
+            draw(); // Initial draw
+        }
+
+        // View Switching
+        window.switchView = function(id) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById('mobile-menu').classList.add('hidden');
+            
+            // Highlight nav
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeNav = document.querySelector(`button[onclick="switchView('${id}')"]`);
+            if(activeNav) activeNav.classList.add('active');
+
+            if(id === 'intro') initBreath();
+        }
+
+        // Init
+        window.addEventListener('DOMContentLoaded', () => {
+            showSeal('lingguan'); // Init seal tab
+            initBreath(); // Init canvas
+        });
+
+        // Mobile Menu
+        document.getElementById('mobile-menu-btn').onclick = () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        };
+
+    </script>
+    
+    <!-- Application Structure Plan:
+         Designed as a "Dark Grimoire" (SPA) for a Daoist Master.
+         1. Intro: Core lineage info & daily status check (Breath visualizer).
+         2. Rituals: The "Process" - Invocation, Timing (Date checker).
+         3. Artifacts: The "Tools" - Hand seals (Tabbed), Weapons.
+         4. Combat: The "Action" - Specific solutions for Wealth, Exorcism, Love.
+         5. Emergency: The "Backup" - No tools methods.
+         6. Spells: Reference library.
+         Why: Breaks down complex magical procedures into functional, accessible modules.
+    -->
+</body>
+</html>
