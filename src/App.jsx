@@ -13,18 +13,16 @@ import { LU_OPTIONS, RANK_SYSTEM } from './constants/rank';
 import { MARSHAL_TITLES, STEM_MARSHALS } from './constants/marshals_meta';
 import { MARSHAL_DATA_STATIC } from './constants/marshals_data';
 
-// 輸入組件：獨立出來以修復 iPhone 鍵盤閃退與九宮格問題
 const InputSection = ({ formData, setFormData, handleStart }) => (
   <div className="max-w-xl mx-auto bg-slate-800/50 p-6 rounded-2xl border border-slate-700 backdrop-blur-sm shadow-xl">
     <div className="text-center mb-6">
       <h2 className="text-xl font-bold text-yellow-500 flex items-center justify-center gap-2">
-        <Sparkles className="w-5 h-5" /> 請輸入法職資料
+        <Sparkles className="w-5 h-5" /> 請輸入法職資料 (農曆)
       </h2>
-      <p className="text-slate-400 text-xs mt-1">正一法統 · 依干支時辰準確分發</p>
+      <p className="text-slate-400 text-xs mt-1">正一法統 · 依農曆干支準確分發</p>
     </div>
 
     <div className="space-y-4">
-      {/* 法名輸入 */}
       <div>
         <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">道友法名 / 姓名</label>
         <input 
@@ -36,7 +34,6 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* 性別選擇 */}
         <div>
           <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">性別</label>
           <div className="flex bg-slate-900 rounded-xl p-1 border border-slate-700">
@@ -50,7 +47,6 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
             >坤道 (女)</button>
           </div>
         </div>
-        {/* 元帥手選 */}
         <div>
           <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">指定元帥 (選填)</label>
           <select 
@@ -58,7 +54,7 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
             value={formData.selectedMarshalId}
             onChange={(e) => setFormData({...formData, selectedMarshalId: e.target.value})}
           >
-            <option value="">-- 依干支時辰自動推算 --</option>
+            <option value="">-- 依農曆干支自動推算 --</option>
             {Object.entries(MARSHAL_DATA_STATIC).map(([id, m]) => (
               <option key={id} value={id}>{m.shortName}</option>
             ))}
@@ -66,7 +62,6 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
         </div>
       </div>
 
-      {/* 授籙等級 */}
       <div>
         <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">授籙等級</label>
         <select 
@@ -78,10 +73,9 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
         </select>
       </div>
 
-      {/* 出生年份與月份 */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">出生年份 (西元)</label>
+          <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">農曆出生年 (西元數值)</label>
           <input 
             type="number"
             inputMode="decimal"
@@ -104,7 +98,6 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
         </div>
       </div>
 
-      {/* 農曆日期與時辰 */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">農曆日期</label>
@@ -117,7 +110,7 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
           </select>
         </div>
         <div>
-          <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">出生時辰</label>
+          <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">農曆出生時辰</label>
           <select 
             className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm"
             value={formData.birthHour}
@@ -141,17 +134,18 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
 const App = () => {
   const [formData, setFormData] = useState({
     name: '', gender: 'm', birthYear: '', birthMonth: '正月',
-    birthDay: '初一', birthHour: '午時 (11-13)',
+    birthDay: '初一', birthHour: '早子時 (23-01)',
     selectedMarshalId: '', rank: '太上三五都功經籙'
   });
   const [result, setResult] = useState(null);
   const [activeTab, setActiveTab] = useState('decree');
   const cardRef = useRef(null);
 
+  // 準確計算農曆年命干支
   const getGanZhiYear = (year) => {
     if (!year) return null;
     const baseYear = 1984; // 甲子年
-    const diff = (year - baseYear) % 60;
+    const diff = (parseInt(year) - baseYear) % 60;
     const index = diff < 0 ? diff + 60 : diff;
     const stem = STEMS[index % 10];
     const branch = BRANCHES[index % 12];
@@ -159,27 +153,30 @@ const App = () => {
   };
 
   const handleStart = () => {
-    if (!formData.name || !formData.birthYear) { alert("請完整輸入法名與年份"); return; }
+    if (!formData.name || !formData.birthYear) { alert("請完整輸入法名與農曆年份"); return; }
     
-    const gz = getGanZhiYear(parseInt(formData.birthYear));
-    const hourBranch = formData.birthHour.substring(0, 1); // 提取時辰地支
+    const gz = getGanZhiYear(formData.birthYear);
+    const hourBranch = formData.birthHour.substring(0, 1); 
     
-    // 1. 本命星君與職能分配
+    // 1. 本命星君
     const starInfo = ZODIAC_MAPPING[gz.branch];
     const roleIdx = starInfo.roleType === 'admin' ? 0 : (starInfo.roleType === 'warrior' ? 1 : 2);
     
-    // 2. 籙職等級對應
+    // 2. 治所壇靖 (準確對應 60 甲子)
+    const zhiData = JIAZI_ZHI_MAPPING[gz.name] || JIAZI_ZHI_MAPPING["甲子"];
+
+    // 3. 職銜分配
     const rankKey = Object.keys(RANK_SYSTEM).find(key => RANK_SYSTEM[key].label === formData.rank) || "dugong";
     const rankData = RANK_SYSTEM[rankKey];
     
-    // 3. 治所壇靖
-    const zhiData = JIAZI_ZHI_MAPPING[gz.name] || JIAZI_ZHI_MAPPING["甲子"];
+    const appoint = rankData.appoints[formData.gender][roleIdx];
+    const office = rankData.offices[roleIdx];
 
-    // 4. 元帥判定修正 (重點修復周元帥抓取)
+    // 4. 元帥判定修正 (根據農曆天干與時辰地支)
     let mId = formData.selectedMarshalId;
     if (!mId) {
-      // 古籍：周元帥(zhou)為神虎提督，戊己年(土)或申酉戌時辰強化對應
-      if (['申', '酉', '戌'].includes(hourBranch) && (gz.stem === '戊' || gz.stem === '己')) {
+      // 修正周元帥判定：地祇系統對應「土」性天干 (戊己) 或特定時辰
+      if ((gz.stem === '戊' || gz.stem === '己') && (['申', '酉', '戌'].includes(hourBranch))) {
         mId = 'zhou';
       } else {
         const pool = STEM_MARSHALS[gz.stem] || STEM_MARSHALS["甲"];
@@ -191,12 +188,7 @@ const App = () => {
     const mTitleData = MARSHAL_TITLES[mId]?.find(t => t.type === starInfo.roleType) || MARSHAL_TITLES[mId]?.[0];
 
     setResult({
-      gz,
-      zhiInfo: zhiData,
-      rankData,
-      appoint: rankData.appoints[formData.gender][roleIdx],
-      office: rankData.offices[roleIdx],
-      marshalInfo,
+      gz, zhiInfo: zhiData, rankData, appoint, office, marshalInfo,
       variantDesc: mTitleData?.desc || "護壇大將",
       starInfo,
       correlation: STEM_CORRELATION[gz.stem],
@@ -217,18 +209,17 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-serif p-4 md:p-8">
-      <header className="text-center mb-8 md:mb-12">
+      <header className="text-center mb-8">
         <h1 className="text-2xl md:text-5xl font-bold mb-2 tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-600">
           ※ 正一法壇 · 職官分發 ※
         </h1>
-        <div className="h-1 w-24 md:w-32 bg-yellow-600 mx-auto rounded-full" />
+        <div className="h-1 w-24 bg-yellow-600 mx-auto rounded-full" />
       </header>
 
       {!result ? (
         <InputSection formData={formData} setFormData={setFormData} handleStart={handleStart} />
       ) : (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
-          {/* 切換頁籤 */}
           <div className="flex justify-center gap-4 text-sm">
             <button onClick={() => setActiveTab('decree')} className={`px-6 py-2 rounded-full flex items-center gap-2 transition ${activeTab === 'decree' ? 'bg-yellow-600 text-white shadow-lg' : 'bg-slate-800 text-slate-400'}`}>
               <Scroll className="w-4 h-4" /> 奏職寶誥
@@ -238,7 +229,6 @@ const App = () => {
             </button>
           </div>
 
-          {/* 渲染結果卡片 */}
           <div ref={cardRef} className="bg-slate-900 border-4 border-double border-yellow-600/50 p-6 md:p-10 rounded-sm shadow-2xl relative overflow-hidden">
             {activeTab === 'decree' ? (
               <div className="space-y-8">
@@ -250,7 +240,7 @@ const App = () => {
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-4 text-sm md:text-base border-b md:border-b-0 md:border-r border-yellow-600/10 pb-4 md:pr-4">
                     <p className="flex items-center gap-3"><User className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">授籙信士：</span> {formData.name}</p>
-                    <p className="flex items-center gap-3"><Compass className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">生辰：</span> {result.gz.name}年 {formData.birthMonth}{formData.birthDay} {formData.birthHour}</p>
+                    <p className="flex items-center gap-3"><Compass className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">農曆生辰：</span> {result.gz.name}年 {formData.birthMonth}{formData.birthDay} {formData.birthHour}</p>
                     <p className="flex items-center gap-3"><MapPin className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">本命治所：</span> {result.zhiInfo.name}</p>
                     <p className="flex items-center gap-3"><Sparkles className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">所配壇靖：</span> {result.zhiInfo.tan} / {result.zhiInfo.jing}</p>
                   </div>
@@ -279,13 +269,12 @@ const App = () => {
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-slate-800/50 p-5 rounded-xl border border-slate-700">
-                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Info className="w-4 h-4" /> 神蹟典籍</h4>
+                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Info className="w-4 h-4" /> 神蹟與職務</h4>
                     <p className="text-slate-300 text-xs leading-relaxed">{result.marshalInfo.intro}</p>
-                    <p className="text-yellow-600/80 text-[10px] mt-2 italic border-t border-yellow-600/20 pt-2">時辰職任：{result.variantDesc}</p>
+                    <p className="text-yellow-600/80 text-[10px] mt-2 italic border-t border-yellow-600/20 pt-2">職任：{result.variantDesc}</p>
                   </div>
                   <div className="bg-slate-800/80 p-5 rounded-xl border-2 border-yellow-600/20 shadow-inner">
-                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Flame className="w-4 h-4" /> 專屬修持法門</h4>
-                    <p className="text-white font-bold text-sm mb-3 bg-yellow-600/20 px-3 py-1 rounded inline-block">{result.marshalInfo.practice.method}</p>
+                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Flame className="w-4 h-4" /> 修持法門</h4>
                     <ul className="space-y-2">
                       {result.marshalInfo.practice.guide.map((step, idx) => (
                         <li key={idx} className="flex gap-2 text-[10px] text-slate-300">
@@ -301,8 +290,8 @@ const App = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 pb-12">
-            <button onClick={exportImage} className="px-8 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl shadow-lg flex items-center gap-2 transition text-sm"><Camera className="w-4 h-4" /> 保存法職寶誥</button>
-            <button onClick={() => { setResult(null); setActiveTab('decree'); }} className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl flex items-center gap-2 transition text-sm"><RotateCcw className="w-4 h-4" /> 重新開壇</button>
+            <button onClick={exportImage} className="px-8 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl shadow-lg flex items-center gap-2 transition text-sm"><Camera className="w-4 h-4" /> 保存</button>
+            <button onClick={() => setResult(null)} className="px-8 py-3 bg-slate-800 text-slate-300 rounded-xl flex items-center gap-2 transition text-sm"><RotateCcw className="w-4 h-4" /> 重新開壇</button>
           </div>
         </div>
       )}
