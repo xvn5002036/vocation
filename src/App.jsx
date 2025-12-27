@@ -13,7 +13,7 @@ import { LU_OPTIONS, RANK_SYSTEM } from './constants/rank';
 import { MARSHAL_TITLES, STEM_MARSHALS } from './constants/marshals_meta';
 import { MARSHAL_DATA_STATIC } from './constants/marshals_data';
 
-// 輸入組件：獨立出來以修復 iPhone 鍵盤閃退與喚起九宮格數字鍵盤
+// --- 修正：移出元件解決手機鍵盤消失問題，並加入數字九宮格優化 ---
 const InputSection = ({ formData, setFormData, handleStart }) => (
   <div className="max-w-xl mx-auto bg-slate-800/50 p-6 rounded-2xl border border-slate-700 backdrop-blur-sm shadow-xl">
     <div className="text-center mb-6">
@@ -38,14 +38,14 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
         <div>
           <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">性別</label>
           <div className="flex bg-slate-900 rounded-xl p-1 border border-slate-700">
-            <button onClick={() => setFormData({...formData, gender: 'm'})} className={`flex-1 py-2 rounded-lg text-xs transition ${formData.gender === 'm' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'}`}>乾道 (男)</button>
-            <button onClick={() => setFormData({...formData, gender: 'f'})} className={`flex-1 py-2 rounded-lg text-xs transition ${formData.gender === 'f' ? 'bg-pink-600 text-white shadow-lg' : 'text-slate-400'}`}>坤道 (女)</button>
+            <button onClick={() => setFormData({...formData, gender: 'm'})} className={`flex-1 py-2 rounded-lg text-xs transition ${formData.gender === 'm' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>乾道 (男)</button>
+            <button onClick={() => setFormData({...formData, gender: 'f'})} className={`flex-1 py-2 rounded-lg text-xs transition ${formData.gender === 'f' ? 'bg-pink-600 text-white' : 'text-slate-400'}`}>坤道 (女)</button>
           </div>
         </div>
         <div>
           <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">指定元帥 (選填)</label>
           <select className="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-2.5 text-white text-xs" value={formData.selectedMarshalId} onChange={(e) => setFormData({...formData, selectedMarshalId: e.target.value})}>
-            <option value="">-- 依農曆干支自動推算 --</option>
+            <option value="">-- 依干支時辰自動推算 --</option>
             {Object.entries(MARSHAL_DATA_STATIC).map(([id, m]) => (<option key={id} value={id}>{m.shortName}</option>))}
           </select>
         </div>
@@ -80,7 +80,7 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
         </select>
       </div>
 
-      <button onClick={handleStart} className="w-full bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-bold py-4 rounded-xl shadow-lg mt-4 flex items-center justify-center gap-2"><Zap className="w-5 h-5" /> 開壇領職</button>
+      <button onClick={handleStart} className="w-full bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-bold py-4 rounded-xl shadow-lg mt-4 flex items-center justify-center gap-2 transition hover:scale-[1.02] active:scale-95"><Zap className="w-5 h-5" /> 開壇領職</button>
     </div>
   </div>
 );
@@ -98,21 +98,26 @@ const App = () => {
     const index = diff < 0 ? diff + 60 : diff;
     const gz = { stem: STEMS[index % 10], branch: BRANCHES[index % 12], name: `${STEMS[index % 10]}${BRANCHES[index % 12]}`, element: STEM_ELEMENT[STEMS[index % 10]] };
     
-    // 1. 治所與星君 (地支精確讀取)
+    // 1. 治所壇靖與星君
     const zhiInfo = JIAZI_ZHI_MAPPING[gz.name] || JIAZI_ZHI_MAPPING["甲子"];
     const starInfo = ZODIAC_MAPPING[gz.branch];
     const roleIdx = starInfo.roleType === 'admin' ? 0 : (starInfo.roleType === 'warrior' ? 1 : 2);
     
-    // 2. 職銜精確分配 (依職能對應而非隨機)
+    // 2. 職銜分配
     const rankData = RANK_SYSTEM[Object.keys(RANK_SYSTEM).find(key => RANK_SYSTEM[key].label === formData.rank) || "dugong"];
     const appoint = rankData.appoints[formData.gender][roleIdx];
     const office = rankData.offices[roleIdx];
 
-    // 3. 元帥判定修正 (子時對應周元帥)
+    // 3. 元帥判定修正：子時優先判定周元帥
     const hourBranch = formData.birthHour.substring(0, 1);
     let mId = formData.selectedMarshalId;
     if (!mId) {
-      mId = (hourBranch === '子') ? 'zhou' : (STEM_MARSHALS[gz.stem][roleIdx % STEM_MARSHALS[gz.stem].length]);
+      if (hourBranch === '子') {
+        mId = 'zhou'; 
+      } else {
+        const pool = STEM_MARSHALS[gz.stem] || STEM_MARSHALS["甲"];
+        mId = pool[roleIdx % pool.length];
+      }
     }
     
     setResult({ gz, zhiInfo, rankData, appoint, office, marshalInfo: MARSHAL_DATA_STATIC[mId], starInfo, correlation: STEM_CORRELATION[gz.stem], variantDesc: MARSHAL_TITLES[mId]?.find(t => t.type === starInfo.roleType)?.desc });
@@ -124,7 +129,7 @@ const App = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-serif p-4">
       <header className="text-center mb-8">
-        <h1 className="text-2xl md:text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-600">※ 正一法壇 · 職官分發 ※</h1>
+        <h1 className="text-2xl md:text-5xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-600">※ 正一法壇 · 職官分發 ※</h1>
         <div className="h-1 w-24 bg-yellow-600 mx-auto rounded-full" />
       </header>
       {!result ? ( <InputSection formData={formData} setFormData={setFormData} handleStart={handleStart} /> ) : (
@@ -144,7 +149,7 @@ const App = () => {
                     <p><MapPin className="inline w-4 h-4 mr-2 text-yellow-600" /> <span className="text-slate-400">本命治所：</span> {result.zhiInfo.name} ({result.zhiInfo.location})</p>
                     <p><Sparkles className="inline w-4 h-4 mr-2 text-yellow-600" /> <span className="text-slate-400">所配壇靖：</span> {result.zhiInfo.tan} / {result.zhiInfo.jing}</p>
                   </div>
-                  <div className="p-4 bg-yellow-600/10 rounded border border-yellow-600/20 text-center">
+                  <div className="p-4 bg-yellow-600/10 rounded border border-yellow-600/20 text-center flex flex-col justify-center">
                     <p className="text-xs text-yellow-600">分發官署：{result.office}</p>
                     <p className="text-xl font-bold text-yellow-500 mt-2">{result.appoint}</p>
                   </div>
@@ -155,17 +160,17 @@ const App = () => {
               <div className="space-y-4">
                 <div className={`flex items-center gap-4 ${result.marshalInfo.color} p-4 rounded-xl text-white shadow-lg`}>
                   <Shield className="w-12 h-12" />
-                  <div><h3 className="text-2xl font-bold">{result.marshalInfo.name}</h3><p className="text-xs opacity-80">時辰守護：{result.variantDesc}</p></div>
+                  <div><h3 className="text-2xl font-bold">{result.marshalInfo.name}</h3><p className="text-xs opacity-80">職任：{result.variantDesc}</p></div>
                 </div>
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-xs md:text-sm leading-relaxed text-slate-300">{result.marshalInfo.intro}</div>
               </div>
             )}
           </div>
-          <div className="flex justify-center gap-4 pb-8"><button onClick={exportImage} className="px-8 py-3 bg-emerald-700 text-white rounded-xl shadow-lg flex items-center gap-2"><Camera className="w-5 h-5" /> 保存</button><button onClick={() => setResult(null)} className="px-8 py-3 bg-slate-800 text-slate-300 rounded-xl">重新重選</button></div>
+          <div className="flex justify-center gap-4 pb-8"><button onClick={exportImage} className="px-8 py-3 bg-emerald-700 text-white rounded-xl shadow-lg flex items-center gap-2"><Camera className="w-5 h-5" /> 保存</button><button onClick={() => setResult(null)} className="px-8 py-3 bg-slate-800 text-slate-300 rounded-xl">重新開壇</button></div>
         </div>
       )}
     </div>
   );
 };
 
-export default App;
+export default App
