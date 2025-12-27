@@ -13,7 +13,7 @@ import { LU_OPTIONS, RANK_SYSTEM } from './constants/rank';
 import { MARSHAL_TITLES, STEM_MARSHALS } from './constants/marshals_meta';
 import { MARSHAL_DATA_STATIC } from './constants/marshals_data';
 
-// --- 修正重點 1：將 InputSection 移出主組件，防止重新渲染時失去焦點導致鍵盤消失 ---
+// 將輸入組件移出，解決手機端鍵盤消失問題
 const InputSection = ({ formData, setFormData, handleStart }) => (
   <div className="max-w-xl mx-auto bg-slate-800/50 p-6 rounded-2xl border border-slate-700 backdrop-blur-sm shadow-xl">
     <div className="text-center mb-6">
@@ -55,7 +55,7 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
             value={formData.selectedMarshalId}
             onChange={(e) => setFormData({...formData, selectedMarshalId: e.target.value})}
           >
-            <option value="">-- 依天干推算 --</option>
+            <option value="">-- 依天干準確推算 --</option>
             {Object.entries(MARSHAL_DATA_STATIC).map(([id, m]) => (
               <option key={id} value={id}>{m.shortName}</option>
             ))}
@@ -79,7 +79,6 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
           <label className="block text-yellow-500/80 text-xs mb-1 ml-1 font-medium">出生西元年</label>
           <input 
             type="number"
-            // --- 修正重點 2：優化 iPhone 數字九宮格鍵盤喚起 ---
             inputMode="decimal"
             pattern="[0-9]*"
             className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm"
@@ -128,26 +127,18 @@ const InputSection = ({ formData, setFormData, handleStart }) => (
 );
 
 const App = () => {
-  // --- 狀態管理 ---
   const [formData, setFormData] = useState({
-    name: '',
-    gender: 'm',
-    birthYear: '',
-    birthMonth: '正月',
-    birthDay: '初一',
-    birthHour: '早子時 (23-01)',
-    selectedMarshalId: '', 
-    rank: '太上三五都功經籙'
+    name: '', gender: 'm', birthYear: '', birthMonth: '正月',
+    birthDay: '初一', birthHour: '早子時 (23-01)',
+    selectedMarshalId: '', rank: '太上三五都功經籙'
   });
-
   const [result, setResult] = useState(null);
-  const [activeTab, setActiveTab] = useState('decree'); 
+  const [activeTab, setActiveTab] = useState('decree');
   const cardRef = useRef(null);
 
-  // --- 核心邏輯演算法 ---
   const getGanZhiYear = (year) => {
     if (!year) return null;
-    const baseYear = 1984; 
+    const baseYear = 1984; // 甲子年
     const diff = (year - baseYear) % 60;
     const index = diff < 0 ? diff + 60 : diff;
     const stem = STEMS[index % 10];
@@ -155,39 +146,44 @@ const App = () => {
     return { stem, branch, name: `${stem}${branch}`, element: STEM_ELEMENT[stem] };
   };
 
-  const getNameScore = (name) => {
-    if (!name) return 0;
-    return name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 4;
-  };
-
+  // 核心古籍演算邏輯修正
   const handleStart = () => {
-    if (!formData.name || !formData.birthYear) {
-      alert("請完整輸入法名與出生年份");
-      return;
-    }
-
+    if (!formData.name || !formData.birthYear) { alert("請完整輸入法名與出生年份"); return; }
+    
     const gz = getGanZhiYear(parseInt(formData.birthYear));
-    const score = getNameScore(formData.name);
-    const zhiInfo = JIAZI_ZHI_MAPPING[gz.name] || JIAZI_ZHI_MAPPING["甲子"];
+    const zodiac = gz.branch; 
+    const starInfo = ZODIAC_MAPPING[zodiac]; // 依地支準確獲取本命星君
+    
+    // 1. 治所對應修正 (根據 mapping.js 的正確欄位 zhi, region)
+    const zhiData = JIAZI_ZHI_MAPPING[gz.name] || JIAZI_ZHI_MAPPING["甲子"];
+    
+    // 2. 職官分配修正：依據本命星君的 roleType (admin/warrior/judge)
     const rankKey = Object.keys(RANK_SYSTEM).find(key => RANK_SYSTEM[key].label === formData.rank) || "dugong";
     const rankData = RANK_SYSTEM[rankKey];
-    const appoint = rankData.appoints[formData.gender][score];
-    const office = rankData.offices[score % rankData.offices.length];
+    
+    // 決定索引：admin -> 0, warrior -> 1, judge -> 2
+    const roleIdx = starInfo.roleType === 'admin' ? 0 : (starInfo.roleType === 'warrior' ? 1 : 2);
+    const appoint = rankData.appoints[formData.gender][roleIdx];
+    const office = rankData.offices[roleIdx % rankData.offices.length];
 
-    let marshalId = formData.selectedMarshalId;
-    if (!marshalId) {
+    // 3. 元帥分配：優先手選，否則依天干所屬部隊中選擇與星君屬性最契合者
+    let mId = formData.selectedMarshalId;
+    if (!mId) {
       const marshalPool = STEM_MARSHALS[gz.stem] || STEM_MARSHALS["甲"];
-      marshalId = marshalPool[score % marshalPool.length];
+      // 依 roleType 選擇部隊中的職位
+      mId = marshalPool[roleIdx % marshalPool.length];
     }
-    const marshalInfo = MARSHAL_DATA_STATIC[marshalId];
-    const zodiac = gz.branch; 
-    const starInfo = ZODIAC_MAPPING[zodiac];
-    const variantDesc = MARSHAL_TITLES[marshalId]?.find(t => t.type === starInfo.roleType)?.appoint || "護壇大將";
-    const correlation = STEM_CORRELATION[gz.stem];
+    
+    const marshalInfo = MARSHAL_DATA_STATIC[mId];
+    // 獲取該元帥在 MARSHAL_TITLES 中的具體職務描述
+    const marshalTitleData = MARSHAL_TITLES[mId]?.find(t => t.type === starInfo.roleType) || MARSHAL_TITLES[mId]?.[0];
 
     setResult({
-      gz, zhiInfo, rankData, appoint, office,
-      marshalInfo, variantDesc, starInfo, correlation,
+      gz, zhiInfo: zhiData, rankData, appoint, office,
+      marshalInfo, 
+      variantDesc: marshalTitleData?.desc || "護壇大將",
+      starInfo,
+      correlation: STEM_CORRELATION[gz.stem],
       powers: rankData.powers
     });
     setActiveTab('decree');
@@ -195,10 +191,7 @@ const App = () => {
 
   const exportImage = async () => {
     if (cardRef.current) {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#0f172a',
-        scale: 2
-      });
+      const canvas = await html2canvas(cardRef.current, { backgroundColor: '#0f172a', scale: 2 });
       const link = document.createElement('a');
       link.download = `Taoist_Decree_${formData.name}.png`;
       link.href = canvas.toDataURL();
@@ -208,7 +201,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-serif p-4 md:p-8">
-      {/* --- 修正重點 3：縮小手機版標題字體 --- */}
       <header className="text-center mb-8 md:mb-12">
         <h1 className="text-2xl md:text-5xl font-bold mb-2 tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-600">
           ※ 正一法壇 · 職官分發 ※
@@ -217,117 +209,67 @@ const App = () => {
       </header>
 
       {!result ? (
-        <InputSection 
-          formData={formData} 
-          setFormData={setFormData} 
-          handleStart={handleStart} 
-        />
+        <InputSection formData={formData} setFormData={setFormData} handleStart={handleStart} />
       ) : (
-        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          
-          <div className="flex justify-center gap-4">
-            <button 
-              onClick={() => setActiveTab('decree')}
-              className={`px-6 py-2 rounded-full flex items-center gap-2 transition text-sm ${activeTab === 'decree' ? 'bg-yellow-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-            >
+        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
+          <div className="flex justify-center gap-4 text-sm">
+            <button onClick={() => setActiveTab('decree')} className={`px-6 py-2 rounded-full flex items-center gap-2 transition ${activeTab === 'decree' ? 'bg-yellow-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
               <Scroll className="w-4 h-4" /> 奏職寶誥
             </button>
-            <button 
-              onClick={() => setActiveTab('marshal')}
-              className={`px-6 py-2 rounded-full flex items-center gap-2 transition text-sm ${activeTab === 'marshal' ? 'bg-yellow-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-            >
+            <button onClick={() => setActiveTab('marshal')} className={`px-6 py-2 rounded-full flex items-center gap-2 transition ${activeTab === 'marshal' ? 'bg-yellow-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
               <Shield className="w-4 h-4" /> 本命元帥
             </button>
           </div>
 
           <div ref={cardRef} className="bg-slate-900 border-4 border-double border-yellow-600/50 p-6 md:p-10 rounded-sm shadow-2xl relative overflow-hidden">
-            
             {activeTab === 'decree' ? (
               <div className="space-y-8">
                 <div className="text-center border-b border-yellow-600/30 pb-6">
-                  <h2 className="text-2xl md:text-3xl font-bold text-yellow-500 mb-2">錄壇奏職寶誥</h2>
-                  <p className="text-slate-400 text-xs md:text-sm tracking-[0.2em]">TAOIST DIVINE DECREE</p>
+                  <h2 className="text-2xl font-bold text-yellow-500 mb-2">錄壇奏職寶誥</h2>
+                  <p className="text-slate-400 text-xs tracking-[0.2em]">TAOIST DIVINE DECREE</p>
                 </div>
-
-                <div className="grid md:grid-cols-2 gap-8 text-base md:text-lg">
-                  <div className="space-y-4 border-b md:border-b-0 md:border-r border-yellow-600/10 pb-4 md:pb-0 md:pr-4">
-                    <div className="flex items-center gap-3">
-                      <User className="w-4 h-4 text-yellow-600" />
-                      <span className="text-slate-400 text-sm">授籙信士：</span>
-                      <span className="text-white border-b border-yellow-600/30 px-2">{formData.name}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Compass className="w-4 h-4 text-yellow-600" />
-                      <span className="text-slate-400 text-sm">年命干支：</span>
-                      <span className="text-yellow-500 font-bold">{result.gz.name}年 ({result.gz.element})</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <MapPin className="w-4 h-4 text-yellow-600" />
-                      <span className="text-slate-400 text-sm">本命治所：</span>
-                      <span className="text-white text-sm">{result.zhiInfo.zhi} ({result.zhiInfo.region})</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Sparkles className="w-4 h-4 text-yellow-600" />
-                      <span className="text-slate-400 text-sm">所配壇靖：</span>
-                      <span className="text-white text-sm">{result.zhiInfo.tan} / {result.zhiInfo.jing}</span>
-                    </div>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-4 text-sm md:text-base border-b md:border-b-0 md:border-r border-yellow-600/10 pb-4 md:pr-4">
+                    <p className="flex items-center gap-3"><User className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">授籙信士：</span> {formData.name}</p>
+                    <p className="flex items-center gap-3"><Compass className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">年命干支：</span> {result.gz.name}年 ({result.gz.element})</p>
+                    <p className="flex items-center gap-3"><MapPin className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">本命治所：</span> {result.zhiInfo.zhi}</p>
+                    <p className="flex items-center gap-3"><Sparkles className="w-4 h-4 text-yellow-600" /> <span className="text-slate-400">所配壇靖：</span> {result.zhiInfo.tan} / {result.zhiInfo.jing}</p>
                   </div>
-
                   <div className="space-y-4">
                     <div className="p-4 bg-yellow-600/10 rounded-lg border border-yellow-600/20">
                       <p className="text-xs text-yellow-600 mb-1">分發官署</p>
-                      <p className="text-lg md:text-xl font-bold text-white">{result.office}</p>
+                      <p className="text-lg font-bold text-white">{result.office}</p>
                       <p className="text-xs text-slate-400 mt-2">封受職銜</p>
-                      <p className="text-xl md:text-2xl font-bold text-yellow-500">{result.appoint}</p>
+                      <p className="text-xl font-bold text-yellow-500">{result.appoint}</p>
                     </div>
                   </div>
                 </div>
-
-                <div className="bg-slate-950/50 p-4 rounded border border-yellow-600/10 text-xs md:text-sm leading-relaxed text-slate-400 italic">
-                  「依據{result.correlation.direction}方{result.correlation.color}帝{result.correlation.qi}炁之法力，
-                  授以此籙，統御鬼神，掃除氛穢。凡我信士，當恭敬奉行。」
+                <div className="bg-slate-950/50 p-4 rounded border border-yellow-600/10 text-xs italic text-slate-400">
+                  「依據{result.correlation.direction}方{result.correlation.color}帝{result.correlation.qi}炁之法力，授以此籙，統御鬼神。」
                 </div>
               </div>
             ) : (
               <div className="space-y-6">
                 <div className={`flex flex-col md:flex-row items-center gap-6 ${result.marshalInfo.color} p-6 rounded-xl border-2 border-white/10`}>
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md shadow-inner">
-                     <Shield className="w-12 h-12 md:w-16 md:h-16 text-white" />
-                  </div>
+                  <Shield className="w-16 h-16 md:w-20 md:h-20 text-white" />
                   <div className="text-center md:text-left flex-1">
-                    <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                      <span className="px-3 py-1 bg-black/30 rounded-full text-[10px] md:text-xs font-bold text-white tracking-widest">
-                        本命護法元帥
-                      </span>
-                    </div>
-                    <h3 className="text-2xl md:text-4xl font-bold text-white mb-2">{result.marshalInfo.name}</h3>
-                    <p className="text-white/90 text-sm md:text-xl font-medium italic opacity-80">「{result.marshalInfo.slogan}」</p>
+                    <span className="px-3 py-1 bg-black/30 rounded-full text-[10px] font-bold text-white tracking-widest uppercase">本命護法元帥</span>
+                    <h3 className="text-3xl font-bold text-white mt-2">{result.marshalInfo.name}</h3>
+                    <p className="text-white/80 italic mt-1 text-sm">「{result.marshalInfo.slogan}」</p>
                   </div>
                 </div>
-
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-slate-800/50 p-5 rounded-xl border border-slate-700">
-                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm">
-                      <Info className="w-4 h-4" /> 神蹟典籍故事
-                    </h4>
-                    <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
-                      {result.marshalInfo.intro}
-                    </p>
+                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Info className="w-4 h-4" /> 神蹟典籍故事</h4>
+                    <p className="text-slate-300 text-xs leading-relaxed">{result.marshalInfo.intro}</p>
                   </div>
-
                   <div className="bg-slate-800/80 p-5 rounded-xl border-2 border-yellow-600/20 shadow-inner">
-                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm">
-                      <Flame className="w-4 h-4" /> 專屬修持法門
-                    </h4>
-                    <p className="text-white font-bold text-sm mb-3 bg-yellow-600/20 px-3 py-1 rounded inline-block">
-                      {result.marshalInfo.practice.method}
-                    </p>
+                    <h4 className="flex items-center gap-2 text-yellow-500 font-bold mb-3 text-sm"><Flame className="w-4 h-4" /> 專屬修持法門</h4>
+                    <p className="text-white font-bold text-sm mb-3 bg-yellow-600/20 px-3 py-1 rounded inline-block">{result.marshalInfo.practice.method}</p>
                     <ul className="space-y-3">
                       {result.marshalInfo.practice.guide.map((step, idx) => (
-                        <li key={idx} className="flex gap-2 text-[10px] md:text-xs text-slate-300">
-                          <span className="flex-shrink-0 w-4 h-4 bg-yellow-600/20 text-yellow-500 rounded-full flex items-center justify-center font-bold">
-                            {idx + 1}
-                          </span>
+                        <li key={idx} className="flex gap-2 text-[10px] text-slate-300">
+                          <span className="flex-shrink-0 w-4 h-4 bg-yellow-600/20 text-yellow-500 rounded-full flex items-center justify-center font-bold">{idx + 1}</span>
                           <span className="leading-relaxed">{step}</span>
                         </li>
                       ))}
@@ -339,29 +281,11 @@ const App = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 pb-12">
-            <button 
-              onClick={exportImage}
-              className="px-6 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl shadow-lg flex items-center gap-2 transition text-sm"
-            >
-              <Camera className="w-4 h-4" /> 保存法職寶誥
-            </button>
-            <button 
-              onClick={() => {
-                setResult(null);
-                setActiveTab('decree');
-              }}
-              className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl shadow-lg flex items-center gap-2 transition text-sm"
-            >
-              <RotateCcw className="w-4 h-4" /> 重新開壇
-            </button>
+            <button onClick={exportImage} className="px-8 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl shadow-lg flex items-center gap-2 transition text-sm"><Camera className="w-4 h-4" /> 保存法職寶誥</button>
+            <button onClick={() => setResult(null)} className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl flex items-center gap-2 transition text-sm"><RotateCcw className="w-4 h-4" /> 重新開壇</button>
           </div>
         </div>
       )}
-
-      <footer className="text-center text-slate-600 text-[10px] mt-8 pb-8 max-w-2xl mx-auto border-t border-slate-900 pt-8">
-        <p className="mb-2">※ 本系統演算邏輯參考《天壇玉格》與道教傳統干支法統 ※</p>
-        <p>凡授籙弟子應當恭敬師長，持戒清淨，方能與元帥感應道交，護持法壇。</p>
-      </footer>
     </div>
   );
 };
