@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>正一法壇職官分發系統</title>
+
+    <!-- 基本 SEO / 分享 -->
+    <meta
+      name="description"
+      content="龍虎山正一派法統考據之正一法壇職官分發系統，依六十甲子、生肖文武判分派治所、官職與元帥。"
+    />
+    <meta name="theme-color" content="#FFF7ED" />
+
+    <!-- 字型：襯線，偏文書 -->
+    <style>
+      :root {
+        --paper: #fff7ed;
+        --ink: #1f2937;
+        --accent: #9a3412;
+        --border: #e5e7eb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: serif;
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none; /* ❌ 禁止 underline */
+      }
+
+      .container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 420px;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 16px 0;
+        font-size: 1.6rem;
+        font-weight: bold;
+      }
+
+      .intro {
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+
+      .features {
+        text-align: left;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      .features p {
+        margin: 4px 0;
+      }
+
+      .enter-btn {
+        display: block;
+        width: 100%;
+        background: #fed7aa;
+        color: var(--accent);
+        border: none;
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .enter-btn:active {
+        transform: scale(0.98);
+      }
+
+      footer {
+        margin-top: 16px;
+        font-size: 0.75rem;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 🔮 首頁（React 掛載前顯示） -->
+    <div class="container" id="home">
+      <div class="card">
+        <h1>正一法壇職官分發系統</h1>
+
+        <div class="intro">
+          本系統依《天壇玉格》《正一修真略儀》
+          與六十甲子法統，推演年命干支，
+          分派治所、官職與法壇元帥，
+          以供授籙、設壇、考據之用。
+        </div>
+
+        <div class="features">
+          <p>・六十甲子治所／壇／靖對應</p>
+          <p>・生肖文／武／判官職分發</p>
+          <p>・主壇／輔壇元帥推薦</p>
+          <p>・疏文輸出、列印、PDF</p>
+        </div>
+
+        <!-- 進入系統 -->
+        <button
+          class="enter-btn"
+          onclick="
+            document.getElementById('home').style.display='none';
+            document.getElementById('root').style.display='block';
+          "
+        >
+          進入法壇
+        </button>
+
+        <footer>
+          龍虎山正一派法統考據系統
+        </footer>
+      </div>
+    </div>
+
+    <!-- ⚙️ React 掛載點（一開始隱藏） -->
+    <div id="root" style="display: none;"></div>
+
+    <!-- Vite / React 入口 -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
