@@ -284,13 +284,13 @@ const PALACE_GLOSSARY = {
             { id: 5, name: "全能與萬福體系 (35-43位)", desc: "核心：變革、福德。負責解析玄機、術數應用以及最終的萬福加持。", Marshals: MARSHAL_CANON.slice(34, 43) }
         ];
 
-        // --- 整合結構 (這一段必須放在上面字典之後) ---
         const DICTIONARY_DATA_STRUCTURE = [
-            { category: "官銜 (Prefix)", id: "rolePrefix", icon: "Award", items: Object.entries(ROLE_PREFIX_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
-            { category: "宮署 (Palace)", id: "palace", icon: "Landmark", items: Object.entries(PALACE_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
-            { category: "職司 (Office)", id: "office", icon: "Activity", items: Object.entries(OFFICE_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
-            { category: "職事 (Duty)", id: "duty", icon: "FileText", items: Object.entries(DUTY_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) }
+            { category: "行政編制 (rolePrefix 官銜全譯)", id: "rolePrefix", icon: "Award", items: Object.entries(ROLE_PREFIX_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
+            { category: "公署地址 (palace 宮署全解)", id: "palace", icon: "Landmark", items: Object.entries(PALACE_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
+            { category: "行政職司 (office 職司詳解)", id: "office", icon: "Activity", items: Object.entries(OFFICE_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
+            { category: "監理職事 (duty 職事詳解)", id: "duty", icon: "FileText", items: Object.entries(DUTY_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) }
         ];
+
 
 
         // ==========================================
