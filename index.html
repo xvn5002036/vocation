@@ -349,7 +349,7 @@
             </nav>
         );
 
-        const HomeView = ({ form, setForm, onAction, isSpinning }) => (
+        const HomeView = ({ form, setForm, onAction, isSpinning, error }) => (
             <div className="space-y-8 animate-in fade-in duration-500 font-sans">
                 <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-zinc-900 shadow-2xl text-zinc-300 text-left">
                     <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4 text-center">
@@ -380,6 +380,11 @@
                                 <button key={s} onClick={() => setForm({...form, hour: s})} className={`py-3 rounded-xl border transition-all ${form.hour === s ? 'bg-amber-600 text-black border-amber-400 scale-105' : 'bg-black/40 border-zinc-900 text-zinc-700'}`}>{s}</button>
                             ))}
                         </div>
+                        {error && (
+                            <div className="mt-2 p-4 rounded-xl border border-amber-900/50 bg-amber-950/30 text-amber-300 text-sm font-bold shadow-inner">
+                                {error}
+                            </div>
+                        )}
                     </div>
                     <button onClick={onAction} disabled={!form.name || isSpinning} className={`w-full mt-10 py-5 rounded-2xl tracking-[0.4em] font-black text-base transition-all shadow-2xl ${(!form.name || isSpinning) ? 'bg-zinc-900 text-zinc-800' : 'bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 text-black active:scale-95'}`}>
                         {isSpinning ? "正 在 核 定..." : "定 格 分 發 職 官"}
@@ -400,6 +405,7 @@
             const [catalogQuery, setCatalogQuery] = useState(''); 
             const [form, setForm] = useState({ name: '', gender: '男生', calendar: 'solar', year: '1987', month: '4', day: '10', hour: '申時' });
             const [result, setResult] = useState(null);
+            const [error, setError] = useState('');
             const [isSpinning, setIsSpinning] = useState(false);
 
             const filteredTerms = useMemo(() => {
@@ -423,30 +429,45 @@
 
             const handleAction = () => {
                 if (!form.name.trim()) return;
+                setError('');
                 setIsSpinning(true);
                 setTimeout(() => {
-                    const yr = parseInt(form.year) || 1984;
-                    const mon = parseInt(form.month) || 1;
-                    const dayNum = parseInt(form.day) || 1;
-                    const calendarOffset = form.calendar === 'solar' ? 2 : 0;
-                    let off = (yr - 1984) % 60;
-                    if (off < 0) off += 60;
-                    const jiazi = JIAZI_60[off];
-                    const m = MARSHAL_CANON[getMarshalIdxByOffset(off)];
-                    const duling = YANG_HOURS.includes(form.hour) ? "左" : "右";
-                    const hl = HELUO_MAPPING[jiazi[0]];
-                    const monSpirit = MONTH_SPIRITS[(mon - 1 + calendarOffset) % 12];
-                    const dayDuty = DAY_DUTIES[(dayNum - 1 + calendarOffset) % DAY_DUTIES.length];
-                    const hourMsg = HOUR_MESSENGERS[form.hour];
+                    try {
+                        const yr = parseInt(form.year) || 1984;
+                        const mon = parseInt(form.month) || 1;
+                        const dayNum = parseInt(form.day) || 1;
+                        const calendarOffset = form.calendar === 'solar' ? 2 : 0;
+                        let off = (yr - 1984) % 60;
+                        if (off < 0) off += 60;
 
-                    setResult({
-                        id: Date.now(), ...form, jiazi, marshal: m.name, prefix: m.prefix, rk: m.rank,
-                        al: m.altar, jn: m.jing, zh: m.zhi, dt: m.duty, pl: m.palace, office: m.office, rolePrefix: m.rolePrefix,
-                        st: STAR_MAPPING[jiazi[1]], hl, dl: duling, monSpirit, dayDuty, hourMsg,
-                        fullRole: form.gender === '男生' ? `${m.rolePrefix}${m.palace}仙官之職` : `封受${m.palace}淑人之位`
-                    });
-                    setTab('result');
-                    setIsSpinning(false);
+                        const jiazi = JIAZI_60[off];
+                        const marshalIdx = getMarshalIdxByOffset(off);
+                        const m = MARSHAL_CANON[marshalIdx];
+                        const hourMsg = HOUR_MESSENGERS[form.hour];
+
+                        if (!jiazi || !m || !hourMsg) {
+                            throw new Error('映射資料缺失');
+                        }
+
+                        const duling = YANG_HOURS.includes(form.hour) ? "左" : "右";
+                        const hl = HELUO_MAPPING[jiazi[0]];
+                        const monSpirit = MONTH_SPIRITS[(mon - 1 + calendarOffset) % 12];
+                        const dayDuty = DAY_DUTIES[(dayNum - 1 + calendarOffset) % DAY_DUTIES.length];
+
+                        setResult({
+                            id: Date.now(), ...form, jiazi, marshal: m.name, prefix: m.prefix, rk: m.rank,
+                            al: m.altar, jn: m.jing, zh: m.zhi, dt: m.duty, pl: m.palace, office: m.office, rolePrefix: m.rolePrefix,
+                            st: STAR_MAPPING[jiazi[1]], hl, dl: duling, monSpirit, dayDuty, hourMsg,
+                            fullRole: form.gender === '男生' ? `${m.rolePrefix}${m.palace}仙官之職` : `封受${m.palace}淑人之位`
+                        });
+                        setTab('result');
+                    } catch (err) {
+                        console.error(err);
+                        setError('無法產生結果，請確認輸入是否完整或嘗試再次送出。');
+                        setTab('home');
+                    } finally {
+                        setIsSpinning(false);
+                    }
                 }, 600);
             };
 
@@ -472,7 +493,7 @@
                     </header>
 
                     <main className="max-w-md mx-auto px-4 py-6 flex-1 w-full pb-24 text-center">
-                        {tab === 'home' && <HomeView form={form} setForm={setForm} onAction={handleAction} isSpinning={isSpinning} />}
+                        {tab === 'home' && <HomeView form={form} setForm={setForm} onAction={handleAction} isSpinning={isSpinning} error={error} />}
                         
                         {tab === 'explanation' && (
                             <div className="space-y-6 animate-in slide-in-from-right duration-500 font-sans text-left">
@@ -493,6 +514,17 @@
                                             <p className="text-zinc-400 text-xs leading-relaxed">{item.meaning}</p>
                                         </div>
                                     )) : <div className="py-20 text-center text-zinc-800 italic font-sans">無匹配條目</div>}
+                                </div>
+                            </div>
+                        )}
+
+                        {tab === 'result' && !result && (
+                            <div className="text-center text-amber-200 py-12 font-sans">
+                                尚未產生結果，請回到錄籍頁面重新送出資訊。
+                                <div className="mt-4">
+                                    <button onClick={() => setTab('home')} className="px-4 py-2 rounded-lg bg-amber-700 text-black font-black shadow-lg active:scale-95">
+                                        回到錄籍
+                                    </button>
                                 </div>
                             </div>
                         )}
