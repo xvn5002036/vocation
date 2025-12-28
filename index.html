@@ -47,7 +47,7 @@
             font-weight: 700;
             color: #ffffff !important;
         }
-        /* 特殊樣式：元命元辰內容適中稍大 */
+        /* 特殊樣式：元命元辰內容適中稍大 (18px) */
         .text-meta-medium {
             font-size: 18px !important;
             font-weight: 500;
@@ -95,10 +95,9 @@
     <script type="text/babel">
         const { useState } = React;
 
-        // --- 核心法統數據庫：43位元帥動態填發基準 ---
         const MARSHAL_CANON = [
             { rank: 1, name: "王靈官", prefix: "都天糾察", rolePrefix: "都天糾察", palace: "都天", office: "知天曹紀錄司", duty: "通天糾察事", zhi: "陽平", altar: "玉堂贊化", jing: "降真集靈" },
-            { rank: 2, name: "馬元帥", prefix: "斗口靈官", rolePrefix: "紫府掌", palace: "善仙", office: "知天曹紀錄司", duty: "三界便宜事", zhi: "葛璝", altar: "三界集神", jing: "洞真自然" }, // 1987 基準
+            { rank: 2, name: "馬元帥", prefix: "斗口靈官", rolePrefix: "紫府掌", palace: "善仙", office: "知天曹紀錄司", duty: "三界便宜事", zhi: "葛璝", altar: "三界集神", jing: "洞真自然" }, 
             { rank: 3, name: "趙元帥", prefix: "玄壇真君", rolePrefix: "知理刑", palace: "玄壇", office: "知理刑紫府司", duty: "金輪執法事", zhi: "鶴鳴", altar: "玄一守道", jing: "凝神志道" },
             { rank: 4, name: "溫元帥", prefix: "地祇主將", rolePrefix: "督察掌", palace: "玉京", office: "知天曹紀錄司", duty: "幽冥督察事", zhi: "女几", altar: "紫微承慶", jing: "太上玄妙" }, 
             { rank: 5, name: "關元帥", prefix: "義勇武安", rolePrefix: "知軍目", palace: "崇寧", office: "知軍目武察司", duty: "義勇巡查事", zhi: "上清", altar: "武德演法", jing: "威靈感應" },
@@ -234,12 +233,12 @@
                                         </div>
                                     </div>
 
-                                    <div className="space-y-6 font-sans">
+                                    <div className="space-y-6 font-sans text-[14px]">
                                         <div className="space-y-1">
                                             <label className="font-black text-zinc-600 uppercase tracking-widest ml-1 italic">受職弟子姓名</label>
                                             <input className="w-full bg-black border border-zinc-800 rounded-xl py-3 px-4 font-bold text-amber-50 outline-none focus:border-amber-600 shadow-inner" placeholder="姓名" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 font-black">
+                                        <div className="grid grid-cols-2 gap-4">
                                             {['男生', '女生'].map(g => (
                                                 <button key={g} onClick={() => setForm({...form, gender: g})} className={`py-4 rounded-xl border transition-all ${form.gender === g ? 'bg-amber-950/40 border-amber-600 text-amber-100 shadow-xl' : 'bg-black border-zinc-900 text-zinc-700'}`}>{g}</button>
                                             ))}
@@ -283,65 +282,59 @@
 
                                         <div className="space-y-12 leading-relaxed text-zinc-300 px-2 font-black">
                                             <div className="space-y-10 font-serif">
-                                                {/* 一奏受：換行、字體加大處理 */}
+                                                {/* 一奏受：換行、字體加大 */}
                                                 <div className="flex flex-col space-y-2">
                                                     <span className="text-amber-600 tracking-widest opacity-60 italic uppercase font-sans">一 奏 受</span>
                                                     <div className="pl-4 border-l-2 border-amber-900/40 py-1">
-                                                        <span className="text-rank-large block">
-                                                            太上三五都功經籙
-                                                        </span>
-                                                        <span className="text-role-extra-large">
-                                                            {result.fullRole}
-                                                        </span>
+                                                        <span className="text-rank-large block">太上三五都功經籙</span>
+                                                        <span className="text-role-extra-large">{result.fullRole}</span>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex flex-col space-y-2">
                                                     <span className="text-amber-600 tracking-widest opacity-60 italic font-sans">一 補 充</span>
                                                     <div className="pl-4 border-l-2 border-amber-900/40 py-1">
-                                                        {/* 一補充：分上下行顯示，並使用加大樣式 */}
-                                                        <span className="text-rank-large block">
-                                                            {result.office}
-                                                        </span>
-                                                        <span className="text-role-extra-large">
-                                                            兼{result.dt}為任
-                                                        </span>
+                                                        <span className="text-rank-large block">{result.office}</span>
+                                                        <span className="text-role-extra-large">兼{result.dt}為任</span>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex flex-col space-y-2">
                                                     <span className="text-amber-600 tracking-widest opacity-60 italic font-sans">一 奏 立</span>
                                                     <div className="pl-4 border-l-2 border-amber-900/40 py-1">
-                                                        {/* 一奏立：字體放大處理 */}
-                                                        <span className="text-role-extra-large">
-                                                            {result.al}壇{result.jn}靖
-                                                        </span>
+                                                        <span className="text-role-extra-large">{result.al}壇{result.jn}靖</span>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex flex-col space-y-2">
                                                     <span className="text-amber-600 tracking-widest opacity-60 italic font-sans">一 泰玄都省正一平炁宮</span>
                                                     <div className="pl-4 border-l-2 border-amber-900/40 py-1">
-                                                        {/* 一泰玄都省：字體放大處理 */}
-                                                        <span className="text-role-extra-large">
-                                                            係 天師{result.zh}治{result.dl}都領炁
-                                                        </span>
+                                                        <span className="text-role-extra-large">係 天師{result.zh}治{result.dl}都領炁</span>
                                                     </div>
                                                 </div>
                                                 
+                                                {/* 已重構：按照「真人府 -> 步罡 -> 先生名 -> 星君」的順序重新排版，唸誦更順 */}
                                                 <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-zinc-900 shadow-inner font-serif">
-                                                    {/* 已重構：不全部擠在一起，改用垂直區塊分層排版，並將文字設定為適中稍大 (18px) */}
                                                     <div className="flex flex-col space-y-5">
-                                                        <div className="pl-4 border-l-2 border-amber-900/20 py-1">
-                                                            <span className="text-meta-medium leading-relaxed block italic">
-                                                                {result.hl.qi}炁君{result.hl.planet}三五步罡元命應{result.hl.master}先生
-                                                            </span>
-                                                        </div>
+                                                        {/* 1. 先確立帝炁與五嶽位格 */}
                                                         <div className="pl-4 border-l-2 border-amber-900/20 py-1">
                                                             <span className="text-meta-medium leading-relaxed block italic">
                                                                 {result.hl.mountain}{result.hl.emperor}{result.hl.qi}炁真人
                                                             </span>
                                                         </div>
+                                                        {/* 2. 再接步罡路徑 */}
+                                                        <div className="pl-4 border-l-2 border-amber-900/20 py-1">
+                                                            <span className="text-meta-medium leading-relaxed block italic">
+                                                                {result.hl.qi}炁君{result.hl.planet}三五步罡
+                                                            </span>
+                                                        </div>
+                                                        {/* 3. 落實個人先生稱號 */}
+                                                        <div className="pl-4 border-l-2 border-amber-900/20 py-1">
+                                                            <span className="text-meta-medium leading-relaxed block italic">
+                                                                元命應{result.hl.master}先生
+                                                            </span>
+                                                        </div>
+                                                        {/* 4. 最後由星君鎮守 */}
                                                         <div className="pl-4 border-l-2 border-amber-900/20 py-1">
                                                             <span className="text-meta-medium leading-relaxed block italic">
                                                                 配屬本命北斗{result.st}星君
@@ -353,9 +346,7 @@
                                                 <p className="flex flex-col space-y-4 pt-10 border-t border-zinc-900/50">
                                                     <span className="text-amber-600 tracking-widest uppercase opacity-60 italic font-sans">一 奏 撥</span>
                                                     <div className="flex flex-col pl-4 py-2 border-l-2 border-amber-900/40">
-                                                        <span className="marshal-title-large">
-                                                            {result.prefix}{result.marshal}
-                                                        </span>
+                                                        <span className="marshal-title-large">{result.prefix}{result.marshal}</span>
                                                         <span className="text-amber-100/60 mt-1 tracking-widest font-sans uppercase">麾下</span>
                                                     </div>
                                                 </p>
