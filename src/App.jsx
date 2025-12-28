@@ -5,6 +5,8 @@ import { JIAZI_ZHI_MAPPING, ZODIAC_MAPPING } from "./constants/mapping";
 import { RANK_SYSTEM } from "./constants/rank";
 import { MARSHALS_DATA } from "./constants/marshals_data";
 import { assignRankByZodiac } from "./utils/rankAssign";
+import { scoreMarshals } from "./utils/marshalScore";
+
 
 // 西曆 → 甲子（1984 = 甲子）
 function getGanzhiFromSolarYear(year) {
