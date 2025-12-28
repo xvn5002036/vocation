@@ -4,6 +4,7 @@ import { STEMS, BRANCHES, STEM_CORRELATION } from "./constants/basic";
 import { JIAZI_ZHI_MAPPING, ZODIAC_MAPPING } from "./constants/mapping";
 import { RANK_SYSTEM } from "./constants/rank";
 import { MARSHALS_DATA } from "./constants/marshals_data";
+import { assignRankByZodiac } from "./utils/rankAssign";
 
 // 西曆 → 甲子（1984 = 甲子）
 function getGanzhiFromSolarYear(year) {
@@ -15,6 +16,7 @@ function getGanzhiFromSolarYear(year) {
   return { stem, branch, key: `${stem}${branch}`, index };
 }
 
+// 🔒 法統校準：mapping.js 指定官職優先
 function getQiTitleFromOfficial(officialKey) {
   let qiTitle = "";
   Object.values(RANK_SYSTEM).forEach((office) => {
@@ -26,59 +28,70 @@ function getQiTitleFromOfficial(officialKey) {
 }
 
 export default function App() {
-  // 1) 輸入模式
-  const [inputMode, setInputMode] = useState("solarYear"); // solarYear | jiazi
+  // 輸入模式
+  const [inputMode, setInputMode] = useState("solarYear");
 
-  // 2) 西曆輸入（最少先做「年」以對應 60 甲子治所）
-  const [solarYear, setSolarYear] = useState(1987); // 預設丁卯
-
-  // 3) 直接選 60 甲子（方便 Benchmark）
+  // 年份 / 甲子
+  const [solarYear, setSolarYear] = useState(1987); // 丁卯
   const [selectedJiaziKey, setSelectedJiaziKey] = useState("丁卯");
 
-  // 4) 八字其他欄位（先做 UI，不省略；後續你要接真正八字演算再串 utils）
+  // 生辰欄位（預留）
   const [month, setMonth] = useState(4);
   const [day, setDay] = useState(10);
-  const [hour, setHour] = useState(16); // 0-23
-  const [gender, setGender] = useState("male"); // male | female
+  const [hour, setHour] = useState(16);
+  const [gender, setGender] = useState("male");
 
-  // 5) 生肖：預設跟年支走，但允許覆寫（授籙分發常有需要）
-  const [zodiacOverride, setZodiacOverride] = useState("auto"); // auto | 子..亥
+  // 生肖（可覆寫）
+  const [zodiacOverride, setZodiacOverride] = useState("auto");
 
+  // 干支計算
   const ganzhi = useMemo(() => {
     if (inputMode === "jiazi") {
-      const stem = selectedJiaziKey.slice(0, 1);
-      const branch = selectedJiaziKey.slice(1, 2);
-      return { stem, branch, key: selectedJiaziKey };
+      return {
+        stem: selectedJiaziKey[0],
+        branch: selectedJiaziKey[1],
+        key: selectedJiaziKey,
+      };
     }
     return getGanzhiFromSolarYear(solarYear);
   }, [inputMode, selectedJiaziKey, solarYear]);
 
+  // 甲子 → 治壇靖
   const mapping = useMemo(() => {
     return JIAZI_ZHI_MAPPING.find((m) => m.key === ganzhi.key) || {};
   }, [ganzhi.key]);
 
   const stemMeta = STEM_CORRELATION[ganzhi.stem] || {};
-  const branchForZodiac = zodiacOverride === "auto" ? ganzhi.branch : zodiacOverride;
+
+  const branchForZodiac =
+    zodiacOverride === "auto" ? ganzhi.branch : zodiacOverride;
+
   const zodiacMeta = ZODIAC_MAPPING[branchForZodiac] || {};
 
-  const qiTitle = useMemo(() => {
-    return getQiTitleFromOfficial(mapping.official);
-  }, [mapping.official]);
+  // ⭐ 正式職務分發（生肖 + 性別）
+  const assignedRank = useMemo(() => {
+    return assignRankByZodiac(branchForZodiac, gender);
+  }, [branchForZodiac, gender]);
 
-  // （先給 UI 用）元帥候選展示：目前先列前 6 位，後續你接 marshalScore.js 再做排序推薦
+  // ⭐ 官職決策優先序：
+  // 1. mapping.js（法統指定，如 丁卯 / 乙亥）
+  // 2. rankAssign（生肖文武判）
+  const finalOfficialKey = mapping.official || assignedRank.officialKey;
+
+  const finalQiTitle = mapping.official
+    ? getQiTitleFromOfficial(mapping.official)
+    : assignedRank.qiTitle;
+
+  // 元帥展示（預覽）
   const marshalPreview = useMemo(() => {
-    return (MARSHALS_DATA || []).slice(0, 6);
+    return MARSHALS_DATA.slice(0, 6);
   }, []);
 
   return (
     <div className="min-h-screen bg-orange-50 p-4 font-serif text-gray-900">
       <header className="mb-4 text-center">
         <h1 className="text-xl font-bold">正一法壇職官分發系統</h1>
-        <p className="text-sm text-gray-700 mt-1">
-          以年干支對應治所／壇靖／炁職，並保留八字欄位供後續擴充
-        </p>
       </header>
-
       {/* 輸入區：不省略 */}
       <section className="mb-6 rounded-lg border bg-white/60 p-4">
         <div className="mb-4">
@@ -191,7 +204,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* 疏文：完全照你的格式 */}
+      {/* 疏文區 */}
       <section className="rounded-lg bg-orange-50 p-4 leading-8 border">
         <p>
           一奏立「
@@ -201,11 +214,13 @@ export default function App() {
           」靖，一奏玄都省正一平炁宮炁 天師「
           <span className="font-bold text-orange-800">{mapping.name}</span>
           」治「
-          <span className="font-bold text-orange-800">{qiTitle}</span>
+          <span className="font-bold text-orange-800">{finalQiTitle}</span>
           」炁，三然君赤天三五步罡元命應「
           <span className="font-bold text-orange-800">{mapping.title}</span>
           」先生「
-          <span className="font-bold text-orange-800">{stemMeta.direction}</span>
+          <span className="font-bold text-orange-800">
+            {stemMeta.direction}
+          </span>
           」嶽「
           <span className="font-bold text-orange-800">{stemMeta.color}</span>
           」帝「
@@ -216,9 +231,8 @@ export default function App() {
         <div className="mt-4 text-sm text-gray-700 space-y-1">
           <p>
             年干支：
-            <span className="ml-1 font-bold text-orange-800">{ganzhi.key}</span>
-            <span className="ml-2">
-              （{ganzhi.stem}干 / {ganzhi.branch}支）
+            <span className="ml-1 font-bold text-orange-800">
+              {ganzhi.key}
             </span>
           </p>
           <p>
@@ -228,33 +242,24 @@ export default function App() {
             </span>
           </p>
           <p>
-            生辰欄位（暫存）：
+            官職來源：
             <span className="ml-1 font-bold text-orange-800">
-              {month}月{day}日 {hour}時
+              {mapping.official ? "法統指定" : "生肖分發"}
             </span>
-            <span className="ml-2">｜{gender === "male" ? "乾道" : "坤道"}</span>
           </p>
         </div>
       </section>
 
-      {/* 元帥區（先展示；後續你要「推薦」再串 marshalScore.js） */}
+      {/* 元帥預覽 */}
       <section className="mt-6 rounded-lg border bg-white/60 p-4">
-        <h2 className="font-bold mb-3">元帥資料庫（展示）</h2>
+        <h2 className="font-bold mb-3">元帥資料庫（預覽）</h2>
         <div className="space-y-3">
           {marshalPreview.map((m) => (
             <div key={m.id} className="rounded border bg-orange-50 p-3">
               <div className="font-bold text-orange-800">
                 {m.name}／{m.title}
               </div>
-              <div className="text-sm text-gray-700 mt-1">
-                <span className="font-bold">存思：</span>{m.visualization}
-              </div>
-              <div className="text-sm text-gray-700 mt-1">
-                <span className="font-bold">印契：</span>{m.mudra}
-              </div>
-              <div className="text-sm text-gray-700 mt-1">
-                <span className="font-bold">咒語：</span>{m.mantra}
-              </div>
+              <div className="text-sm mt-1">{m.visualization}</div>
             </div>
           ))}
         </div>
