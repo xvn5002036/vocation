@@ -80,6 +80,18 @@ export default function App() {
   // 2. rankAssign（生肖文武判）
   const finalOfficialKey = mapping.official || assignedRank.officialKey;
 
+// ⭐ 元帥推薦（正式）
+const marshalResult = useMemo(() => {
+  return scoreMarshals({
+    stem: ganzhi.stem,
+    branch: branchForZodiac,
+    officialKey: finalOfficialKey,
+  });
+}, [ganzhi.stem, branchForZodiac, finalOfficialKey]);
+
+const mainMarshal = marshalResult.main;
+const assistantMarshals = marshalResult.assistants || [];
+  
   const finalQiTitle = mapping.official
     ? getQiTitleFromOfficial(mapping.official)
     : assignedRank.qiTitle;
