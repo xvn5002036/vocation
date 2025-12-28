@@ -9,22 +9,28 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- 使用 html2pdf 用於產生 PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- 襯線字體 -->
+    <!-- 專業襯線字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        body { background-color: #010101; margin: 0; padding: 0; color: #e5d5b0; font-family: 'Noto Sans TC', sans-serif; }
+        body { background-color: #010101; color: #e5d5b0; font-family: 'Noto Sans TC', sans-serif; margin: 0; padding: 0; }
         .font-serif-tc { font-family: 'Noto Serif TC', serif; }
         .dynamic-gold { color: #FFD700 !important; font-weight: 900 !important; }
-        .text-content-row { font-size: 22px !important; line-height: 1.6; font-weight: 700; color: #fefefa; }
-        .text-label { font-size: 14px !important; font-weight: 900; color: #d97706; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.2em; }
-        .reporting-box { background: linear-gradient(to bottom, #0a0a0a, #050505); border: 1px solid #8a2318; border-left-width: 6px; box-shadow: inset 0 0 20px rgba(138, 35, 24, 0.2); }
+        
+        /* 文字加大設定 */
+        .text-huge { font-size: 26px !important; font-weight: 900; color: #FFD700; }
+        .text-large { font-size: 24px !important; line-height: 1.6; font-weight: 700; }
+        .text-content { font-size: 18px !important; color: #d1d1d1; line-height: 1.8; }
+        
+        /* 按鈕縮小設定 */
+        .btn-small { padding: 4px 10px !important; font-size: 11px !important; border-radius: 9999px !important; }
+        .tab-btn { padding: 4px 12px !important; font-size: 11px !important; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #FFD700; border-bottom-color: #FFD700; background: rgba(255, 215, 0, 0.05); }
+
+        .reporting-box { background: linear-gradient(to bottom, #0a0a0a, #050505); border-left: 6px solid #8a2318; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .ordination-paper { background: #050505; position: relative; overflow: hidden; width: 100%; border: 1px solid rgba(217, 119, 6, 0.1); }
         .glossary-card { background: rgba(15, 15, 15, 0.9); border: 1px solid rgba(212, 175, 55, 0.15); backdrop-blur-lg; }
-        .tab-btn { transition: all 0.3s ease; border-bottom: 2px solid transparent; }
-        .tab-btn.active { color: #FFD700; border-bottom-color: #FFD700; background: rgba(255, 215, 0, 0.05); }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         @media print { .no-print { display: none !important; } }
@@ -37,7 +43,7 @@
         const { useState, useEffect, useMemo } = React;
 
         // ==========================================
-        // 第一區塊：法統數據與翻譯庫 (置頂定義)
+        // 【第一區塊：法統數據庫】
         // ==========================================
 
         const YANG_HOURS = ["子時", "寅時", "辰時", "午時", "申時", "戌時"];
@@ -111,52 +117,53 @@
             { rank: 43, name: "王高元帥", prefix: "萬福真君", rolePrefix: "萬福掌", palace: "萬福府", office: "知群仙考較司", duty: "群仙考較事", zhi: "真多治", altar: "萬壽無疆壇", jing: "福祿壽星靖" }
         ];
 
-        // --- 完整翻譯解釋表 ---
-        // --- 全量翻譯字典 (修正後的範圍) ---
+        // ==========================================
+        // 【第二區塊：法語翻譯與解釋字典 (全量)】
+        // ==========================================
+
         const ROLE_PREFIX_GLOSSARY = {
-            "都天糾察": "翻譯：天界最高執行官。負責巡視三界、糾正不正之氣與一切邪祟。",
-            "紫府掌": "翻譯：靈魂檔案總管。紫府為仙界公文往來與名籍存放之中心。",
-            "知理刑": "翻譯：法界裁判官。負責依天條審理冤情、判定是非並施予法務處分。",
-            "督察掌": "翻譯：駐壇總監察員。代表天廷監督法師行法是否合乎天條與科儀規範。",
-            "知軍目": "翻譯：神兵調遣官。負責管理並核對法師麾下所撥發之神兵馬匹與防務事項。",
-            "至德掌": "翻譯：道德與時運監控官。與六十甲子同步，考核法師之內在功德修持。",
-            "知忠義": "翻譯：忠誠度考評官。專司維護法師對道統之純粹性，防止私慾干擾法力。",
-            "仁聖掌": "翻譯：慈悲救護官。主理賑災、救度靈魂與撥發生命修復能量之公職。",
-            "知雷霆": "翻譯：雷部行政主管。掌握雷電能量之動員許可，為行使雷法的必要權限。",
-            "知律令": "翻譯：法令監督員。確保每一道行政命令符合法界法律程序，是秩序的守護者。",
-            "知南斗": "翻譯：生命命運管理局（南）。負責註生、添油與命理上升的事務。",
-            "知北斗": "翻譯：災難消除主管，負責禳除凶星、抹除死籍與解除人間厄難。",
-            "知混元": "翻譯：先天能量調度官，具備調用宇宙最純粹、原始能量的權限。",
-            "知神霄": "翻譯：最高雷法專員，獲准進入神霄境界，修習頂層雷霆秘法。",
-            "知星府": "翻譯：星辰能量協調官。負責抵禦外來負面星煞對法師或信眾的干擾。",
-            "知天樞": "翻譯：宇宙運行樞紐員。控制北斗天樞核心，是調撥環境大氣運的關鍵職位。",
-            "知地祇": "翻譯：土地神靈總監。負責調停地靈、龍脈、土地神與人類之間的和諧。",
-            "知教門": "翻譯：正法傳播官。負責管理經本、教育法師後學並維持法脈傳承之穩定。",
-            "巡察掌": "翻譯：法界巡邏警察。負責維護法師所在地之陰陽平衡與日常安防。",
-            "廣澤掌": "翻譯：水源與雨量計畫主管。負責調節區域內的水分能量，多用於祈雨或解災。",
-            "兩儀掌": "翻譯：陰陽平衡調節官。專門負責修復被扭曲的時空磁場或失衡的對立能量。",
-            "慈航掌": "翻譯：靈魂救濟員。專司拯救墜入迷途、恐懼或愛欲中無法脫身的靈魂。",
-            "百草掌": "翻譯：神農藥理主任。負責管理草木精氣與法醫藥理，是修復生靈體魄的主管。",
-            "威靈掌": "翻譯：驅邪前鋒官。具備強大的靈魂威壓，能直接退散惡質能量。",
-            "倫常掌": "翻譯：倫理秩序監督員。負責導正受損的家庭與社會關係能量，維護基本法度。",
-            "精金掌": "翻譯：法器淬煉官。負責監督法器鍛造過程，賦予其特定的靈性密度。",
-            "后土掌": "翻譯：大地承載力官。負責維持基地的承載能量，穩固建築與地理基層。",
-            "三官掌": "翻譯：三元功過考評員。負責核算天、地、水三界對眾生的善惡紀錄。",
-            "神武掌": "翻譯：神武防衛總監。負責強化法壇的防禦工事與神兵的作戰意志。",
-            "剛正掌": "翻譯：鐵面執法官。代表法師行使絕對公正的法權，不為私情所動搖。",
-            "風火掌": "翻譯：自然災害控制官。負責調度風雷火電等能量進行大面積的淨化任務。",
-            "玉虛掌": "翻譯：高階行政顧問。具備直接向高層上奏祕密公文與調度祕法資源的特權。",
-            "盤石掌": "翻譯：穩定性維護員。負責鎮守地脈中不穩定的區塊，防止能量流失。",
-            "永恆掌": "翻譯：靈脈傳承維護官。確保法師修行根基不受時間侵蝕，維持永恆靈性。",
-            "三教掌": "翻譯：文化融合協調官。負責處理與儒、佛及其他宗教界域的跨界合作。",
-            "大德掌": "翻譯：功德撥發主管。負責將累積的善德轉化為實質的法力回饋或福報。",
-            "剛勇掌": "翻譯：先鋒軍團指揮。具備強大衝勁，負責攻堅最為頑固的負面堡壘。",
-            "河洛掌": "翻譯：術數與變革官。負責依據河圖洛書之理推演變化，破解複雜禁制。",
-            "雷祖掌": "翻譯：雷霆總教官。負責培訓雷部神將，確保雷霆法能之純淨度。",
-            "太白掌": "翻譯：清淨過濾官。具備如太白金星般的過濾能量，能過濾雜質、提升純度。",
-            "奇門掌": "翻譯：時空與遁法官。負責管理奇門遁甲之運作，隱藏行蹤或突襲邪祟。",
-            "通明掌": "翻譯：明鑑與感知官。負責提升法師的通靈覺察能力，洞悉虛實。",
-            "萬福掌": "翻譯：最終福德撥發官。負責在法事圓滿時，向信眾與法師撥發全方位祝福。"
+            "都天糾察": "天界最高執行官。負責巡視三界、糾正不正之氣與一切邪祟。",
+            "紫府掌": "靈魂檔案總管。紫府為仙界公文往來與名籍存放之中心。",
+            "知理刑": "法界裁判官。負責依天條審理冤情、判定是非並施予法務處分。",
+            "督察掌": "駐壇總監察。代表天廷監督法師行法過程是否如法、不生私心。",
+            "知軍目": "神兵調遣指揮。負責管理並核對撥發給法師的一千五百員兵馬。",
+            "至德掌": "太歲與道德監督員。與六十甲子同步，考核法師內在修行功德。",
+            "知忠義": "忠誠度評定官。專司維護法師對道統之純粹性，防止法力受污。",
+            "仁聖掌": "慈悲救護官。主理賑災救度靈魂、撥發生命修復能量的公職。",
+            "知雷霆": "雷部行政首長。擁有調用雷電能量的權限，是雷法行使的核心授權。",
+            "知律令": "法令執行監督。確保每一道行政命令符合法界法律程序，維持秩序。",
+            "知南斗": "命運管理局(南)。負責註生、添油、改運與命理上升的事務。",
+            "知北斗": "命運管理局(北)。負責禳災、解厄、抹除死籍與改運的事務。",
+            "知混元": "先天能量調度官。代表能調用最原始、純粹的宇宙大能。",
+            "知神霄": "高階雷法專員。代表具備進入神霄宮修習最高雷霆法理的資格。",
+            "知星府": "星辰能量協調官。負責抵禦外來負面星煞對法師或信眾的干擾。",
+            "知天樞": "宇宙運行樞紐員。控制北斗天樞核心，調撥環境大氣運。",
+            "知地祇": "土地守護總監。負責調停地靈、龍脈、土地神與人類之間的和諧。",
+            "知教門": "正法傳播官。負責管理經本、教育法師後學並維持法脈穩定。",
+            "巡察掌": "法界巡邏警察。負責維護所在地陰陽平衡與日常安防。",
+            "廣澤掌": "水源與雨量計畫主管。負責調節區域內水分能量，多用於祈雨。",
+            "兩儀掌": "陰陽平衡調節官。負責修復被扭曲的時空磁場或失衡的對立能量。",
+            "慈航掌": "靈魂救濟員。專司拯救墜入迷途、恐懼或愛欲無法脫身的靈魂。",
+            "百草掌": "神農藥道官。負責管理草木精氣與法醫藥理，修復生靈體魄。",
+            "威靈掌": "驅邪前鋒官。具備強大的靈魂威壓，能直接退散惡質能量。",
+            "倫常掌": "倫理秩序官。負責導正受損的家庭與社會關係能量，維護基本法度。",
+            "精金掌": "法器淬煉官。負責監督法器鍛造過程，賦予特定的靈性密度。",
+            "后土掌": "大地承載力官。負責維持基地的承載能量，穩固地基與建築。",
+            "三官掌": "三元功過考評員。負責核算天、地、水三界對眾生的善惡紀錄。",
+            "神武掌": "神武防衛總監。負責強化法壇的防禦工事與神兵的作戰意志。",
+            "剛正掌": "鐵面執法官。代表法師行使絕對公正的法權，不為私情動搖。",
+            "風火掌": "自然災害控制。負責調度風雷火電等能量進行大面積淨化。",
+            "玉虛掌": "高階行政顧問。具備直接向高層上奏祕密公文與調度祕法資源的特權。",
+            "盤石掌": "穩定性維護員。負責鎮守地脈中不穩定的區塊，防止能量流失。",
+            "永恆掌": "靈脈傳承維護。確保修行根基不隨時間磨滅，維持靈魂永恆。",
+            "三教掌": "文化融合協調官。負責處理與儒、佛及其他宗教界域的跨界合作。",
+            "大德掌": "功德撥發主管。負責將累積的善德轉化為實質的法力回饋或福報。",
+            "剛勇掌": "先鋒軍團指揮。具備強大衝勁，負責攻堅最為頑固的負面堡壘。",
+            "河洛掌": "術數與變革官。負責依據河圖洛書之理推演變化，破解複雜禁制。",
+            "雷祖掌": "雷霆總教官。負責培訓雷部神將，確保雷霆法能之純淨度。",
+            "太白掌": "清淨過濾官。具備如太白金星般的過濾能量，能提升純度。",
+            "通明掌": "明鑑與感知官。負責提升法師的通靈覺察能力，洞悉虛實。",
+            "萬福掌": "最終福德發放。負責在法事圓滿時，向眾生撥發全方位祝福。"
         };
 
         const PALACE_GLOSSARY = {
@@ -172,14 +179,14 @@
             "南斗宮": "解構：生命管理中心。主理註生、添油、延命與福份上升的專門機構。",
             "北斗閣": "解構：災難消除部門。專司抹除死籍、禳除凶星與化解人間苦厄。",
             "混元觀": "解構：先天真氣源頭。法師修持內丹、連接原始宇宙能量的場所。",
-            "無極院": "解構：先天真氣源頭。與混元觀同屬最原始能量的交感點。",
+            "無極院": "解構：虛無之源。修煉法力、歸於自然的至高修行空間與交感點。",
             "天樞院": "解構：宇宙運行控制室。掌管定位、星能分配與宇宙關鍵樞紐。",
             "紫微宮": "解構：星宿統治中心。星辰運作與天體秩序之核心管理宮殿。",
             "神霄殿": "解構：雷部最高境界。唯有獲得高階授權法師方能進入的純淨雷能場。",
             "鎮元觀": "解構：土地與龍脈守護站。處理所有關於大地地靈與陰陽交界事務。",
             "宣化府": "解構：道教教育總部. 管理經本印刷、道教教育與法脈傳承之行政中心。",
-            "保仙閣": "解構：地方守護站。負責特定區域的能量場安防與神靈駐守的事務。",
-            "廣澤宮": "解構：水利計畫中心。負責降水計畫、河川治理與生態能量調節。",
+            "保仙閣": "解構：地方守護中心。負責特定區域的能量場安防與靈性守護。",
+            "廣澤宮": "解構：水分計畫中心。負責降水計畫、河川治理與生態能量調節。",
             "慈航殿": "解構：慈悲療癒中心。對受傷或受驚靈魂進行修復與加持的溫馨場域。",
             "長生觀": "解構：修復與壽元維護處。專門負責管理長生不老藥理與靈氣修復法門。",
             "忠義宮": "解構：誠信與勇氣之源。鍛鍊法師作戰意志與忠誠品質的公署。",
@@ -187,7 +194,7 @@
             "開元殿": "解構：一切法脈之開端。象徵新計畫的啟動與原始創造力的源頭。",
             "坤元府": "解構：大地能量儲存所。與厚德載物相關的地理行政機關。",
             "三元觀": "解構：三官大帝辦事處。負責審核三界功過紀錄的基層行政單位。",
-            "武聖殿": "解構：戰力提升中心。訓練兵馬作戰意志與法師勇氣的地點。",
+            "武聖殿": "解構：戰力提升中心。訓練神兵、提升法界武力防守的公署。",
             "剛義府": "解構：司法執行處。執行具有強硬公正性的法界律法處分。",
             "風火院": "解構：自然能量噴發室。負責管理暴風與天火等毀滅性或淨化性能量。",
             "玉虛宮": "解構：高層神明議事廳。處理重大法界決策與跨維度事務的地方。",
@@ -200,104 +207,106 @@
             "雷鳴府": "解構：聲波能量研究站. 負責利用雷聲震懾邪惡、喚醒生靈自覺的機構。",
             "太白觀": "解構：過濾與淨化站。負責精煉能量純度、去除混雜邪氣的專業部門。",
             "隱元殿": "解構：機密行動總部. 處理隱匿、潛入與高難度祕密任務的行政區。",
-            "奇門殿": "解構：戰術與策略總部，負責高難度戰場佈局。",
+            "奇門殿": "解構：策略與隱匿總部，管理時空挪移與遁法策略部署的部門。",
             "通明宮": "解構：光明與覺悟中心。象徵徹底的透明、智慧與洞察真相的聖地。",
             "萬福府": "解構：最終祝福分配處. 負責在法事圓滿時撥發全方位好運與和平能量。"
         };
 
         const OFFICE_GLOSSARY = {
             "知天曹紀錄司": "功能：天廷檔案局長。負責法師奏報紀錄、功過核算與疏文存檔。",
-            "知理刑紫府司": "功能：法界大法官辦公室。主管靈魂判決、解冤釋結與執法裁定。",
-            "知軍目武察司": "功能：兵馬督察辦公室。負責點閱天兵武裝、兵權調度與防務檢查。",
-            "知太歲府紀錄司": "功能：年份運勢監理官。主管個人年份轉運、歲次更迭與流年紀錄。",
-            "知忠義糾察司": "功能：信願品質監控室。考核法師本心，確保法力不被私欲歪曲。",
-            "知雷霆天曹司": "功能：雷部行政決策室。負責發送雷法執行令，是能量攻擊的源頭。",
-            "知律令五雷司": "功能：雷法法規範。確保五雷執行時不傷害無辜，符合天條程序。",
-            "知南斗注生司": "功能：生命增補室。掌管靈魂註生、增補福壽與氣運上升的申報。",
+            "知理刑紫府司": "功能：法界裁判署。主管靈魂判決、解冤釋結與法務處分。",
+            "知軍目武察司": "功能：兵馬督察辦。負責點閱天兵武裝、兵權調度與防務檢查。",
+            "知太歲府紀錄司": "功能：年份運勢監理。主管個人年份轉運、歲次更迭與流年紀錄。",
+            "知忠義糾察司": "功能：品質監控室。考核法師本心，確保法力不被私欲歪曲。",
+            "知雷霆天曹司": "功能：雷部行政決策。負責發送雷法執行令，是能量攻擊源頭。",
+            "知律令五雷司": "功能：雷法法規範。確保五雷執行符合天條程序，維持秩序。",
+            "知南斗注生司": "功能：生命增補室。掌管靈魂註生、增補福壽與氣運上升。",
             "知北斗禳災司": "功能：災厄移除室。負責抹除死籍、禳除災星與修復破產氣運。",
-            "知混元一氣司": "功能：原始能量中心。負責連接法師內煉與宇宙大能的橋樑。",
-            "知星漢昭輝司": "功能：星宮氣運平衡處。負責調節大星系的磁場，保持法壇與星辰共振。",
-            "知天樞密運司": "功能：宇宙核心控制器。掌握能量轉向，是影響局勢大變革的關鍵單位。",
-            "知火符傳遞司": "功能：緊急公文交換處。負責利用符火能量極速傳遞特急文書。",
-            "知地靈安鎮司": "功能：地理穩定管理局。負責平息地震、安撫龍脈與地理風水優化。",
-            "知正法演音司": "功能：文化傳播中心。負責法脈經書、教育培訓與文化宣傳工作的管理。",
-            "知巡遊糾察司": "功能：地方巡邏署。負責維護區域性安寧、防止散邪作亂的機層執法機關。",
-            "知水雲降澤司": "功能：氣象計畫中心。負責分配雨水能量、預防旱災或調節氣候平衡。",
-            "知兩儀交泰司": "功能：陰陽平衡室。專司修復時空裂縫、調解對立情緒與磁場扭曲。",
-            "知慈航渡厄司": "功能：難民營管理局。專司接納、安撫並引導受苦靈魂的慈善中心。",
-            "知百草靈丹司": "功能：法醫藥局長。管理靈性藥物、轉化草木精華來修復人體或靈體。",
-            "知倫常演禮司": "功能：社會規範監理室。負責維護基本的家庭關係、倫理美德與和諧環境。",
-            "知威靈顯應司": "功能：前鋒特戰部隊。負責直接的威嚇邪祟任務，保護受害者免受侵擾。",
-            "知精金淬煉司": "功能：法器研發中心。精進金屬靈性、打造高品質法器的管理部門。",
-            "知后土坤載司": "功能：建築與地基監管。維持土地承載能量穩定，固本培元的基石部門。",
-            "知三官考較司": "功能：總計量化中心。統一計算天、地、水三官手中的功德與債務平衡。",
-            "知神武衛道司": "功能：國防保衛室。強化神將戰鬥效能、防止邪教或魔類衝擊正信法脈。",
-            "知金光護法司": "功能：光能防禦中心。負責啟動法壇金光罩，提供高強度的靈魂防護。",
-            "知九天風火司": "功能：極端氣候管理。調用暴風與天火等能量進行淨化與重塑。",
-            "知五嶽朝天司": "功能：山脈能量控制器。負責管理山神土地力量，維護地區穩重性。",
-            "知永恆法脈司": "功能：靈性資產保護處。保護核心修為不受歲月磨滅的法律行政部門。",
-            "知三教並圓司": "功能：跨界協調中心。處理與佛教、儒家等其他界域的共融共存法律事務。",
-            "知大德廣生司": "功能：福報生產線。負責將面積累積的無形善念轉化為實體的好運與健康。",
-            "知剛勇降魔司": "功能：斬首行動部。專門負責對抗最強大邪崇、執行高風險降魔行動。",
-            "知先天術數司": "功能：宇宙密碼局。研究河圖洛書、破解因果邏輯、預測未來趨向的智庫。",
-            "知九天雷祖司": "功能：雷霆訓練總署。培訓高層雷將、管理最高純度的雷霆法力資產。",
-            "知白金肅靜司": "功能：雜質處理中心。利用肅殺之氣去除邪能，保持環境極致清淨的機關。",
-            "知奇門遁甲司": "功能：戰術與隱形局。管理時空挪移、隱匿與戰場策略部署的部門。",
-            "知守衛仙都司": "功能：天門守衛處。負責守護法界要塞與天覽檢查與防務。",
-            "知群仙考較司": "功能：眾神績效管理。負責評估各路神靈在人間執行的任務成效與獎懲。"
+            "知混元一氣司": "功能：原始能量中心。負責連接法師內煉與宇宙原始大能。",
+            "知星漢昭輝司": "功能：星系磁場平衡處。調節大星系磁場，保持天人共振。",
+            "知天樞密運司": "功能：樞紐控制器。掌握能量轉向，是影響變革的關鍵單位。",
+            "知火符傳遞司": "功能：極速公文交換。利用符火能量極速傳遞特急文書。",
+            "知地靈安鎮司": "功能：地理管理局。負責平息地震、安撫龍脈與風水優化。",
+            "知正法演音司": "功能：文化傳播總署。負責經本、法師教育與文化宣傳。",
+            "知巡遊糾察司": "功能：地方巡邏署。負責維護區域安寧、防止散邪作亂。",
+            "知水雲降澤司": "功能：氣象計畫中心。負責分配雨水能量、預防旱災或調節氣候。",
+            "知兩儀交泰司": "功能：平衡修復室。專司修復磁場扭曲、調解對立勢力衝突。",
+            "知慈航渡厄司": "功能：靈魂安撫所。接納並引導受苦靈魂歸於光明的慈善中心。",
+            "知百草靈丹司": "功能：法醫藥局。管理靈性藥物、轉化草木精華修復生靈。",
+            "知倫常演禮司": "功能：倫理監理室。維護家庭與社會和諧，導正基本道德規範。",
+            "知威靈顯應司": "功能：特種作戰部。負責直接的威嚇邪祟，保護弱小者不受侵擾。",
+            "知精金淬煉司": "功能：法器研發中心。精進金屬靈性、打造高級法器的部門。",
+            "知后土坤載司": "功能：建築地基監管。維持土地承載能量穩定，固本培元。",
+            "知三官考較司": "功能：量化中心。統一計算天地水三官手中之功德債務平衡。",
+            "知神武衛道司": "功能：國防保衛室。強化神將戰鬥效能，防止負面能量衝擊。",
+            "知金光護法司": "功能：防禦罩啟動處。負責啟動法壇金光，提供靈魂防護。",
+            "知九天風火司": "功能：極端氣候管理。調用暴風與天火等能量進行環境重塑。",
+            "知玉虛朝聖司": "功能：高層秘書處。處理向最高層級神明匯報之朝聖事項。",
+            "知五嶽朝天司": "功能：山脈控制器。負責管理山神土地力量，維護地區穩定。",
+            "知永恆法脈司": "功能：資產保護。保護核心修為不隨歲月磨滅的法律行政部門。",
+            "知三教並圓司": "功能：跨界協調中心。處理道釋儒共融共存之法律事務。",
+            "知大德廣生司": "功能：福報生產線。將善念轉化為實體的好運、財富與健康。",
+            "知剛勇降魔司": "功能：斬首行動部。專對抗強大邪崇、執行高風險降魔任務。",
+            "知先天術數司": "功能：宇宙密碼局。研究河圖洛書、破解因果邏輯之智庫。",
+            "知九天雷祖司": "功能：雷霆訓練總署。培訓雷將、管理高純度雷霆法力資產。",
+            "知白金肅靜司": "功能：雜質處理。利用肅殺之氣去除邪能，保持環境極致清淨。",
+            "知奇門遁甲司": "功能：戰術部署局。管理時空挪移、隱匿與戰場策略之部門。",
+            "知守衛仙都司": "功能：天門保衛處。負責守護法界要塞與天門口安全檢查。",
+            "知群仙考較司": "功能：眾神績效管理。負責評估基層神靈之任務成效與獎懲。"
         };
 
         const DUTY_GLOSSARY = {
-            "通天糾察事": "權限：具備直接上通天廷、糾察三界行政不法與邪祟干擾的全面權力。",
-            "三界便宜事": "權限：獲贈『便宜行事』特權。法師在處理緊急靈務時，有權先斬後奏。",
-            "金輪執法事": "權限：行使具有剛猛強制性的法權，能如金輪般碾碎頑強邪能。",
-            "幽冥督察事": "權限：負責監督冥府行政、解開冤親債主糾結、查閱靈界司法卷宗。",
-            "義勇巡查事": "權限：代表法師獲授法界巡警職責，主動出擊尋找不安穩的負源。",
-            "至德考較事": "權限：負責定期的內在道德品質檢測，作為法職晉升的數據依據。",
+            "通天糾察事": "權限：具備直接上通天廷、糾察三界行政不法之全面權力。",
+            "三界便宜事": "權限：獲贈『便宜行事』特權。處理靈務時有權先斬後奏。",
+            "金輪執法事": "權限：行使剛猛強制法權，能如金輪般碾碎頑強邪能。",
+            "幽冥督察事": "權限：監督冥府行政、解開冤親債主糾結、查閱靈界司法卷宗。",
+            "義勇巡查事": "權限：獲授法界巡警職責，主動出擊尋找負面根源。",
+            "至德考較事": "權限：負責定期的內在道德檢測，作為職位晉升依據。",
             "兵戈鎮壓事": "權限：平定局部動亂或兵戈之災，化解肅殺氣氛，恢復和平。",
-            "生靈保命事": "權限：主理延生保命事宜。當生靈遭遇生命危機時，負責調撥防護能量。",
-            "電火威權事": "權限：獲得直接動用雷部火電能之權，具備強大能量輸出的戰鬥特許。",
-            "五雷執行事": "權限：獲得五雷法行使許可。可召遣雷將執行打擊邪崇等核心法務。",
-            "延生註錄事": "權限：負責將善功轉化為壽元增益，並在天廷名冊中正式登記。",
-            "消災解厄事": "權限：負責抹除負面的命理標籤（厄難），化解災難連鎖反應。",
-            "陰陽判斷事": "權限：具備『辨識真偽』與『裁斷陰陽』的能力，解決跨界糾紛。",
-            "星辰運作事": "權限：負責協調個體與本命元辰星的磁場同步，確保星辰護佑力。",
-            "樞機密運事": "權限：操作環境的樞紐能量，促成關鍵的人事物轉向，使死路逢生。",
-            "地脈安鎮事": "權限：平息地脈擾動、安撫土地公與安鎮龍氣，確保磁場穩固。",
-            "教門弘法事": "權限：擴展道教影響力、開班傳道並維持法統傳承的神聖教育職責。",
-            "境內巡察事": "權限：具備區域性的法界治理權，負責維持陰陽治安與能量平衡。",
-            "江河潤澤事": "權限：主管水資源分配，修復乾渴大地靈氣，主理生態與降雨計畫。",
-            "濟度沉淪事": "權限：拯救落入無明、恐懼或深淵中的靈魂，將其拉回修行正軌。",
-            "妖邪掃除事": "權限：純粹的戰鬥職能。負責全面清理、消滅破壞秩序的負面能量體。",
-            "金石鑄造事": "權限：監督法器、符圖製作。將物質精煉為具備靈壓的法寶。",
-            "厚德載物事": "權限：提升基地的承載能量上限，使環境能容納更多福分，穩固事業。",
-            "考校功過事": "權限：負責對眾生進行公平的績效核算，決定後續福報或磨煉分配。",
-            "甲兵操練事": "權限：負責提升麾下神兵的作戰意志，確保法師行法時戰力充沛。",
-            "五金司掌事": "權限：管理金屬資源。負責維持秩序中的強硬、不可動搖部分。",
-            "五雷風火事": "權限：調動綜合自然能量進行大面積淨化與環境重塑任務。",
-            "玄通感應事": "權限：提升法師與高層神明的通訊頻寬，增加法事感應速度。",
+            "生靈保命事": "權限：延生保命事宜。遭遇危機時負責調撥防護能量。",
+            "電火威權事": "權限：動用雷部火電能之權，具備強大戰鬥特許權。",
+            "五雷執行事": "權限：獲得五雷法行使許可。召遣雷將執行核心法務。",
+            "延生註錄事": "權限：負責將善功轉化為壽元增益，並在名冊中登記。",
+            "消災解厄事": "權限：負責抹除負面命理標籤（厄難），化解災難鏈。",
+            "陰陽判斷事": "權限：具備『辨識真偽』與『裁斷陰陽』解決跨界糾紛。",
+            "星辰運作事": "權限：協調個體與本命元辰星同步，確保星辰護佑力。",
+            "樞機密運事": "權限：操作環境樞紐能量，促成轉向，使死路逢生。",
+            "地脈安鎮事": "權限：平息地脈擾動、安撫土地龍氣，確保磁場穩固。",
+            "教門弘法事": "權限：擴展教化影響力、開班傳道並維持法統之責。",
+            "境內巡察事": "權限：具備區域治理權，維護特定範圍內之陰陽治安。",
+            "江河潤澤事": "權限：主管水資源分配，修復乾渴大地之降雨計畫。",
+            "濟度沉淪事": "權限：拯救落入無明、恐懼或深淵之靈魂回歸正軌。",
+            "妖邪掃除事": "權限：戰鬥職能。負責清理破壞秩序之負面能量體。",
+            "金石鑄造事": "權限：監督法器、符圖製作。將物質精煉為法寶。",
+            "厚德載物事": "權限：提升基地的承載能量上限，穩固事業與福分。",
+            "考校功過事": "權限：負責對眾生進行公平考核，決定福報或磨煉。",
+            "甲兵操練事": "權限：提升麾下神兵作戰意志，確保法師行法戰力。",
+            "五金司掌事": "權限：管理金屬資源。維護秩序中強硬、不可動搖部分。",
+            "五雷風火事": "權限：調動雷風火能量進行大面積淨化與環境重塑。",
+            "玄通感應事": "權限：提升與高層神明通訊頻寬，增加感應速準度。",
             "山嶽鎮守事": "權限：維護山川大地的氣運節點，防止大型龍脈能量流失。",
-            "恆久法界事": "權限：負責保護修行的核心種子，確保法脈與法力不受歲月剝削。",
-            "三教並圓事": "權限：處理跨領域宗教與文化能量的和諧與共融事項。",
-            "施予福報事": "權限：具備撥發實體財運、福氣與好運的審核權限。",
-            "伏虎降龍事": "權限：降伏內在慾念與外在狂暴邪能，控制極端強大能量的能力。",
-            "易理推衍事": "權限：分析局勢動能變化，預測未來趨向並優化現實路徑。",
-            "九天震動事": "權限：發出強烈靈魂聲波，喚醒沉睡良知，嚇退一切邪魔。",
-            "西方肅殺事": "權限：行使金氣力量，果斷切斷不必要的惡緣與負面糾纏。",
-            "遁法施行事": "權限：管理避難、隱藏或快速撤收術法，在危難時刻保護目標。",
-            "天門手衛事": "權限：負責天壇、天門與重要維度的守護任務，嚴防非授權能量擅闖。",
-            "群仙考較事": "權限：負責對區域內的所有神靈、地靈進行績效考核的司法審核權。"
+            "恆久法界事": "權限：保護修行的核心種子，確保法脈恆久穩定。",
+            "三教並圓事": "權限：處理道釋儒跨宗教文化能量的和諧共融事項。",
+            "施予福報事": "權限：具備撥發財運、福氣與好運的審核權限。",
+            "伏虎降龍事": "權限：降伏內在慾念與狂暴邪能，控制極端強大能量。",
+            "易理推衍事": "權限：分析局勢動能變化，預測未來趨向並優化路徑。",
+            "九天震動事": "權限：發出強烈靈魂聲波，喚醒良知，嚇退邪祟。",
+            "西方肅殺事": "權限：行使金氣力量，果斷切斷不必要之惡緣糾纏。",
+            "遁法施行事": "權限：管理避難、隱藏或快速撤收術法，保護目標。",
+            "天門手衛事": "權限：負責重要維度的守護任務，嚴防非授權擅闖。",
+            "群仙考較事": "權限：負責對區域內的所有神靈、地靈進行績效考核。"
         };
-        
 
-
-        // --- 辭典結構數據 (用於渲染) ---
-        const DICTIONARY_DATA = [
-            { category: "行政編制 (官銜全譯)", id: "rolePrefix", icon: "Award", items: Object.entries(ROLE_PREFIX_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
-            { category: "公署地址 (宮署全解)", id: "palace", icon: "Landmark", items: Object.entries(PALACE_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
-            { category: "行政職司 (職司詳解)", id: "office", icon: "Activity", items: Object.entries(OFFICE_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
-            { category: "監理職事 (職事詳解)", id: "duty", icon: "FileText", items: Object.entries(DUTY_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) }
+        const DICTIONARY_DATA_STRUCTURE = [
+            { category: "官銜 (Prefix)", id: "rolePrefix", icon: "Award", items: Object.entries(ROLE_PREFIX_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
+            { category: "宮署 (Palace)", id: "palace", icon: "Landmark", items: Object.entries(PALACE_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
+            { category: "職司 (Office)", id: "office", icon: "Activity", items: Object.entries(OFFICE_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) },
+            { category: "職事 (Duty)", id: "duty", icon: "FileText", items: Object.entries(DUTY_GLOSSARY).map(([term, meaning]) => ({ term, meaning })) }
         ];
+
+        // ==========================================
+        // 【第三區塊：輔助與組件邏輯】
+        // ==========================================
 
         const getMarshalIdxByOffset = (off) => {
             const g = Math.floor(off / 4);
@@ -306,16 +315,12 @@
             return (1 + g) % 43; 
         };
 
-        // ==========================================
-        // 第二區塊：SVG 圖示組件
-        // ==========================================
-
-        const Icon = ({ name, className = "w-6 h-6", size = 24 }) => {
-            const paths = {
+        const Icon = ({ name, size = 18, className = "" }) => {
+            const icons = {
                 Scroll: "M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4",
                 BookOpen: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zm20 0h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z",
                 Menu: "M4 6h16M4 12h16M4 18h16",
-                HelpCircle: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-15v2m0 4h.01",
+                Help: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-15v2m0 4h.01",
                 Activity: "M22 12h-4l-3 9L9 3l-3 9H2",
                 Search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm10 2l-4.35-4.35",
                 Award: "M12 15l-2 5 2-1 2 1-2-5zm0 0l-3-1.5L6 15l3-4.5L12 9l3 1.5 3 4.5-3 1.5L12 15z",
@@ -323,97 +328,30 @@
                 FileText: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
             };
             return (
-                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    <path d={paths[name] || "M12 2v20M2 12h20"} />
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={{display: 'inline-block'}}>
+                    <path d={icons[name] || ""} />
                 </svg>
             );
         };
 
-        // ==========================================
-        // 第三區塊：子組件定義
-        // ==========================================
-
+        // --- 子組件：導覽列 ---
         const Navigation = ({ activeTab, setTab }) => (
             <nav className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-3xl border-t border-amber-900/20 p-4 pb-8 z-50 max-w-md mx-auto rounded-t-[2.5rem] shadow-2xl no-print">
                 <div className="flex justify-around items-center px-4 font-sans text-[11px] font-black">
-                    <button onClick={() => setTab('home')} className={`flex flex-col items-center space-y-1 px-4 py-2 transition-all ${activeTab === 'home' || activeTab === 'result' ? 'text-amber-400 scale-110' : 'text-zinc-700 opacity-60'}`}>
+                    <button onClick={() => setTab('home')} className={`btn-small flex flex-col items-center space-y-1 transition-all ${activeTab === 'home' || activeTab === 'result' ? 'text-amber-400 scale-110' : 'text-zinc-700 opacity-60'}`}>
                         <Icon name="Scroll" size={20}/><span>登記</span>
                     </button>
-                    <button onClick={() => setTab('explanation')} className={`flex flex-col items-center space-y-1 px-4 py-2 transition-all ${activeTab === 'explanation' ? 'text-amber-400 scale-110' : 'text-zinc-700 opacity-60'}`}>
-                        <Icon name="HelpCircle" size={20}/><span>詞典</span>
+                    <button onClick={() => setTab('explanation')} className={`btn-small flex flex-col items-center space-y-1 transition-all ${activeTab === 'explanation' ? 'text-amber-400 scale-110' : 'text-zinc-700 opacity-60'}`}>
+                        <Icon name="Help" size={20}/><span>詞典</span>
                     </button>
-                    <button onClick={() => setTab('catalog')} className={`flex flex-col items-center space-y-1 px-4 py-2 transition-all ${activeTab === 'catalog' ? 'text-amber-400 scale-110' : 'text-zinc-700 opacity-60'}`}>
+                    <button onClick={() => setTab('catalog')} className={`btn-small flex flex-col items-center space-y-1 transition-all ${activeTab === 'catalog' ? 'text-amber-400 scale-110' : 'text-zinc-700 opacity-60'}`}>
                         <Icon name="BookOpen" size={20}/><span>元帥</span>
                     </button>
                 </div>
             </nav>
         );
 
-        const ResultView = ({ result, setTab, onSavePDF }) => (
-            <div className="space-y-6 animate-in fade-in duration-500 font-sans text-left">
-                <div className="bg-gradient-to-br from-zinc-950 via-black to-zinc-900 rounded-3xl border border-amber-900/20 shadow-2xl overflow-hidden" id="ordination-certificate">
-                    <div className="px-6 py-4 flex items-center justify-between border-b border-amber-900/20 bg-amber-950/10">
-                        <div className="flex items-center gap-2 text-amber-200 font-black tracking-[0.2em] text-xs">
-                            <Icon name="Award" size={16}/> 職 官 撥 付 文 書
-                        </div>
-                        <span className="text-[10px] text-amber-800 font-black">#{result.rk}</span>
-                    </div>
-                    <div className="p-6 space-y-5 text-amber-50">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="text-xs text-amber-200/80 font-black">受職弟子</p>
-                                <p className="text-2xl font-black tracking-wide">{result.name}</p>
-                                <p className="text-[11px] text-amber-500 mt-1">{result.gender} ・ {result.calendar === 'solar' ? '國曆' : '農曆'} {result.year} / {result.month} / {result.day} {result.hour}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-xs text-amber-200/80 font-black">甲子序</p>
-                                <p className="text-xl font-black text-amber-400">{result.jiazi}</p>
-                                <p className="text-[11px] text-amber-500">斗宿：{result.st}</p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div className="reporting-box p-4 rounded-2xl">
-                                <p className="text-[10px] text-amber-500 font-black tracking-[0.2em] mb-2">任 命 職 掛</p>
-                                <p className="text-lg font-black text-amber-200">{result.marshal}</p>
-                                <p className="text-xs text-zinc-400">{result.prefix}</p>
-                                <p className="text-xs text-zinc-400 mt-2">{result.fullRole}</p>
-                            </div>
-                            <div className="reporting-box p-4 rounded-2xl">
-                                <p className="text-[10px] text-amber-500 font-black tracking-[0.2em] mb-2">政 務 配 置</p>
-                                <p className="text-lg font-black text-amber-200">{result.pl}</p>
-                                <p className="text-xs text-zinc-400">{result.office}</p>
-                                <p className="text-xs text-zinc-400 mt-2">職掌：{result.dt}</p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 text-xs text-zinc-300">
-                            <div className="bg-zinc-950/60 border border-amber-900/20 rounded-2xl p-4 space-y-1">
-                                <p className="text-amber-500 font-black text-[10px] tracking-[0.2em]">天 衡 校 對</p>
-                                <p>陰陽左/右：{result.dl}</p>
-                                <p>河洛主宰：{result.hl.master} ({result.hl.emperor})</p>
-                                <p>月將：{result.monSpirit}</p>
-                                <p>日值：{result.dayDuty}</p>
-                                <p>時值：{result.hourMsg}</p>
-                            </div>
-                            <div className="bg-zinc-950/60 border border-amber-900/20 rounded-2xl p-4 space-y-1">
-                                <p className="text-amber-500 font-black text-[10px] tracking-[0.2em]">法 籙 資 訊</p>
-                                <p>主壇：{result.al}</p>
-                                <p>靖文：{result.jn}</p>
-                                <p>治理：{result.zh}</p>
-                                <p>星曜：{result.st}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex gap-3 no-print">
-                    <button onClick={() => setTab('home')} className="flex-1 py-4 rounded-2xl border border-amber-900/40 text-amber-100 font-black bg-black/60 active:scale-95 transition-all">重新登記</button>
-                    <button onClick={onSavePDF} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-400 text-black font-black active:scale-95 transition-all">下載職牒</button>
-                </div>
-            </div>
-        );
-
+        // --- 子組件：首頁登記視圖 ---
         const HomeView = ({ form, setForm, onAction, isSpinning }) => (
             <div className="space-y-8 animate-in fade-in duration-500 font-sans">
                 <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-zinc-900 shadow-2xl text-zinc-300 text-left">
@@ -421,14 +359,14 @@
                         <span className="tracking-widest text-amber-100 uppercase italic font-black flex items-center gap-2"><Icon name="Activity" size={14}/> 錄 籍 申 奏</span>
                         <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800">
                             {['solar', 'lunar'].map(m => (
-                                <button key={m} onClick={() => setForm({...form, calendar: m})} className={`px-4 py-1.5 rounded-md transition-all text-[10px] font-black ${form.calendar === m ? 'bg-amber-900 text-white' : 'text-zinc-700'}`}>{m === 'solar' ? '國曆' : '農曆'}</button>
+                                <button key={m} onClick={() => setForm({...form, calendar: m})} className={`btn-small px-4 py-1 font-black ${form.calendar === m ? 'bg-amber-900 text-white' : 'text-zinc-700'}`}>{m === 'solar' ? '國曆' : '農曆'}</button>
                             ))}
                         </div>
                     </div>
                     <div className="space-y-6">
                         <div className="space-y-1">
                             <label className="font-black text-zinc-600 uppercase tracking-widest text-[11px]">受職弟子姓名</label>
-                            <input className="w-full bg-black border border-zinc-800 rounded-xl py-4 px-5 font-bold text-amber-50 outline-none focus:border-amber-600 shadow-inner text-lg" placeholder="姓名" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+                            <input className="w-full bg-black border border-zinc-800 rounded-xl py-4 px-5 text-huge outline-none focus:border-amber-600 shadow-inner" placeholder="姓名" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                         </div>
                         <div className="grid grid-cols-2 gap-4 font-black text-sm text-center">
                             {['男生', '女生'].map(g => (
@@ -436,9 +374,9 @@
                             ))}
                         </div>
                         <div className="grid grid-cols-3 gap-3 text-center font-black">
-                            <div className="bg-black p-3 rounded-xl border border-zinc-800"><label className="block text-zinc-700 mb-1 text-[10px] uppercase">元辰(年)</label><input type="number" className="w-full bg-transparent text-amber-500 text-center outline-none font-bold text-xl" value={form.year} onChange={e => setForm({...form, year: e.target.value})} /></div>
-                            <div className="bg-black p-3 rounded-xl border border-zinc-800"><label className="block text-zinc-700 mb-1 text-[10px]">月份</label><select className="w-full bg-transparent font-bold text-amber-100 outline-none text-center text-xl" value={form.month} onChange={e => setForm({...form, month: e.target.value})}>{Array.from({length: 12}, (_, i) => i + 1).map(m => <option key={m} value={m} className="bg-black">{m}月</option>)}</select></div>
-                            <div className="bg-black p-3 rounded-xl border border-zinc-800"><label className="block text-zinc-700 mb-1 text-[10px]">日期</label><select className="w-full bg-transparent font-bold text-amber-100 outline-none text-center text-xl" value={form.day} onChange={e => setForm({...form, day: e.target.value})}>{Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d} className="bg-black">{d}日</option>)}</select></div>
+                            <div className="bg-black p-3 rounded-xl border border-zinc-800"><label className="block text-zinc-700 mb-1 text-[10px] uppercase">元辰(年)</label><input type="number" className="w-full bg-transparent text-amber-500 text-center outline-none text-large" value={form.year} onChange={e => setForm({...form, year: e.target.value})} /></div>
+                            <div className="bg-black p-3 rounded-xl border border-zinc-800"><label className="block text-zinc-700 mb-1 text-[10px]">月份</label><select className="w-full bg-transparent font-bold text-amber-100 appearance-none outline-none text-center text-large" value={form.month} onChange={e => setForm({...form, month: e.target.value})}>{Array.from({length: 12}, (_, i) => i + 1).map(m => <option key={m} value={m} className="bg-black">{m}月</option>)}</select></div>
+                            <div className="bg-black p-3 rounded-xl border border-zinc-800"><label className="block text-zinc-700 mb-1 text-[10px]">日期</label><select className="w-full bg-transparent font-bold text-amber-100 appearance-none outline-none text-center text-large" value={form.day} onChange={e => setForm({...form, day: e.target.value})}>{Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d} className="bg-black">{d}日</option>)}</select></div>
                         </div>
                         <div className="grid grid-cols-4 gap-2 font-black text-[11px]">
                             {Object.keys(HOUR_MESSENGERS).map(s => (
@@ -446,45 +384,59 @@
                             ))}
                         </div>
                     </div>
-                    <button onClick={onAction} disabled={!form.name || isSpinning} className={`w-full mt-10 py-5 rounded-2xl tracking-[0.4em] font-black text-base transition-all shadow-2xl ${(!form.name || isSpinning) ? 'bg-zinc-900 text-zinc-800' : 'bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 text-black active:scale-95'}`}>
+                    <button onClick={onAction} disabled={!form.name || isSpinning} className={`w-full mt-10 py-5 rounded-2xl tracking-[0.4em] font-black text-large transition-all shadow-2xl ${(!form.name || isSpinning) ? 'bg-zinc-900 text-zinc-800' : 'bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 text-black active:scale-95'}`}>
                         {isSpinning ? "正 在 核 定..." : "定 格 分 發 職 官"}
                     </button>
                 </div>
             </div>
         );
 
+        // --- 子組件：詞典視圖 ---
+        const ExplanationView = ({ glossaryCategory, setGlossaryCategory, dictionarySearch, setDictionarySearch, filteredTerms }) => (
+            <div className="p-4 space-y-6 animate-in slide-in-from-right duration-500 text-left">
+                <h2 className="text-xl font-black text-amber-100 border-l-4 border-amber-600 pl-4">法語全量翻譯解碼</h2>
+                <div className="relative">
+                    <div className="absolute left-3 top-3.5 text-zinc-600"><Icon name="Search" size={16}/></div>
+                    <input className="w-full bg-black border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-amber-50 outline-none focus:border-amber-600 font-bold" placeholder="搜尋..." value={dictionarySearch} onChange={e => setDictionarySearch(e.target.value)} />
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar font-black">
+                    {DICTIONARY_DATA_STRUCTURE.map(g => (
+                        <button key={g.id} onClick={() => setGlossaryCategory(g.id)} className={`tab-btn flex-shrink-0 rounded-full flex items-center gap-2 border transition-all ${glossaryCategory === g.id ? 'bg-amber-900 border-amber-500 text-amber-100' : 'bg-zinc-950 border-zinc-800 text-zinc-600'}`}>
+                            <Icon name={g.icon} size={12}/> {g.category.split(' ')[0]} ({g.items.length})
+                        </button>
+                    ))}
+                </div>
+                <div className="space-y-4">
+                    {filteredTerms.length > 0 ? filteredTerms.map((item, i) => (
+                        <div key={i} className="glossary-card p-6 rounded-3xl border-l-4 border-l-amber-600/60 shadow-xl">
+                            <h4 className="text-huge mb-2 font-serif-tc">{item.term}</h4>
+                            <p className="text-content font-sans">{item.meaning}</p>
+                        </div>
+                    )) : <div className="py-20 text-center text-zinc-800 italic font-bold">無匹配內容</div>}
+                </div>
+            </div>
+        );
+
         // ==========================================
-        // 主程式組件
+        // 【第四區塊：主程式 App】
         // ==========================================
 
         function App() {
             const [tab, setTab] = useState('home');
-            const [menuOpen, setMenuOpen] = useState(false);
-            const [glossaryCategory, setGlossaryCategory] = useState('rolePrefix'); 
-            const [dictionarySearch, setDictionarySearch] = useState(''); 
-            const [catalogQuery, setCatalogQuery] = useState(''); 
             const [form, setForm] = useState({ name: '', gender: '男生', calendar: 'solar', year: '1987', month: '4', day: '10', hour: '申時' });
             const [result, setResult] = useState(null);
             const [isSpinning, setIsSpinning] = useState(false);
+            const [glossaryCategory, setGlossaryCategory] = useState('rolePrefix'); 
+            const [dictionarySearch, setDictionarySearch] = useState(''); 
+            const [catalogQuery, setCatalogQuery] = useState('');
 
             const filteredTerms = useMemo(() => {
-                const currentGroup = DICTIONARY_DATA.find(g => g.id === glossaryCategory);
+                const currentGroup = DICTIONARY_DATA_STRUCTURE.find(g => g.id === glossaryCategory);
                 if (!currentGroup) return [];
                 return currentGroup.items.filter(item => 
                     item.term.includes(dictionarySearch) || item.meaning.includes(dictionarySearch)
                 );
             }, [glossaryCategory, dictionarySearch]);
-
-            const renderIcon = (iconName) => {
-                const iconProps = { className: "text-amber-500", size: 20 };
-                switch(iconName) {
-                    case "Award": return <Icon name="Award" {...iconProps}/>;
-                    case "Landmark": return <Icon name="Landmark" {...iconProps}/>;
-                    case "Activity": return <Icon name="Activity" {...iconProps}/>;
-                    case "FileText": return <Icon name="FileText" {...iconProps}/>;
-                    default: return <Icon name="HelpCircle" {...iconProps}/>;
-                }
-            };
 
             const handleAction = () => {
                 if (!form.name.trim()) return;
@@ -498,16 +450,15 @@
                     if (off < 0) off += 60;
                     const jiazi = JIAZI_60[off];
                     const m = MARSHAL_CANON[getMarshalIdxByOffset(off)];
-                    const duling = YANG_HOURS.includes(form.hour) ? "左" : "右";
                     const hl = HELUO_MAPPING[jiazi[0]];
                     const monSpirit = MONTH_SPIRITS[(mon - 1 + calendarOffset) % 12];
                     const dayDuty = DAY_DUTIES[(dayNum - 1 + calendarOffset) % DAY_DUTIES.length];
-                    const hourMsg = HOUR_MESSENGERS[form.hour];
 
                     setResult({
                         id: Date.now(), ...form, jiazi, marshal: m.name, prefix: m.prefix, rk: m.rank,
                         al: m.altar, jn: m.jing, zh: m.zhi, dt: m.duty, pl: m.palace, office: m.office, rolePrefix: m.rolePrefix,
-                        st: STAR_MAPPING[jiazi[1]], hl, dl: duling, monSpirit, dayDuty, hourMsg,
+                        st: STAR_MAPPING[jiazi[1]], hl, dl: YANG_HOURS.includes(form.hour) ? "左" : "右", 
+                        monSpirit, dayDuty, hourMsg: HOUR_MESSENGERS[form.hour],
                         fullRole: form.gender === '男生' ? `${m.rolePrefix}${m.palace}仙官之職` : `封受${m.palace}淑人之位`
                     });
                     setTab('result');
@@ -518,67 +469,55 @@
             const handleSavePDF = () => {
                 const element = document.getElementById('ordination-certificate');
                 if (!element) return;
-                const opt = {
-                    margin: [5, 5], 
-                    filename: `萬法宗壇_職牒_${result.name}.pdf`,
-                    image: { type: 'jpeg', quality: 1.0 },
-                    html2canvas: { scale: 2, backgroundColor: '#050505' },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
+                const opt = { margin: [5, 5], filename: `職牒_${result.name}.pdf`, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 2, backgroundColor: '#050505' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
                 html2pdf().from(element).set(opt).save();
             };
 
             return (
-                <div className="flex flex-col min-h-screen">
-                    <header className="sticky top-0 z-50 bg-black/90 border-b border-amber-900/30 px-6 py-4 flex justify-between items-center shadow-xl no-print">
-                        <button onClick={() => setMenuOpen(true)} className="p-2 text-amber-50 active:scale-75 transition-all"><Icon name="Menu" size={24}/></button>
-                        <h1 className="tracking-widest text-amber-100 italic font-black text-base uppercase">正一職官法典系統</h1>
-                        <button onClick={() => setTab('explanation')} className="p-2 text-amber-50"><Icon name="HelpCircle" size={24}/></button>
+                <div className="min-h-screen bg-[#010101] max-w-md mx-auto relative pb-24 shadow-2xl border-x border-zinc-900">
+                    <header className="sticky top-0 z-50 bg-black/90 border-b border-amber-900/30 px-6 py-4 flex justify-between items-center no-print">
+                        <div className="text-amber-500 font-black tracking-tighter italic">萬法宗壇</div>
+                        <h1 className="text-[10px] font-black tracking-widest text-amber-100 uppercase">職官法典系統</h1>
+                        <button onClick={() => setTab('explanation')} className="p-1 text-amber-500"><Icon name="Help" size={18}/></button>
                     </header>
 
-                    <main className="max-w-md mx-auto px-4 py-6 flex-1 w-full pb-24 text-center">
+                    <main className="p-4">
                         {tab === 'home' && <HomeView form={form} setForm={setForm} onAction={handleAction} isSpinning={isSpinning} />}
+                        {tab === 'explanation' && <ExplanationView glossaryCategory={glossaryCategory} setGlossaryCategory={setGlossaryCategory} dictionarySearch={dictionarySearch} setDictionarySearch={setDictionarySearch} filteredTerms={filteredTerms} />}
                         
-                        {tab === 'explanation' && (
-                            <div className="space-y-6 animate-in slide-in-from-right duration-500 font-sans text-left">
-                                <h2 className="text-xl font-black text-amber-100 tracking-widest border-l-4 border-amber-600 pl-4 mb-8">法語辭典</h2>
-                                <div className="relative mb-6">
-                                    <Icon name="Search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-700" />
-                                    <input className="w-full bg-black border border-zinc-900 rounded-xl py-4 pl-12 pr-4 font-bold text-amber-50 outline-none focus:border-amber-600" placeholder="搜尋術語..." value={dictionarySearch} onChange={e => setDictionarySearch(e.target.value)} />
+                        {tab === 'result' && result && (
+                            <div className="animate-in zoom-in-95 duration-700 pb-20 font-serif text-zinc-300">
+                                <div className="reporting-box rounded-2xl p-6 text-large mb-10 text-left no-print border-l-4 border-amber-600">
+                                    <span className="text-label block mb-2 font-sans italic">奏職口訣</span>
+                                    太上三五都功職 <span className="dynamic-gold">{result.rolePrefix}{result.pl}</span>，知 <span className="dynamic-gold">{result.office}</span> 兼 <span className="dynamic-gold">{result.dt}</span>。隸 <span className="dynamic-gold">{result.prefix}{result.marshal}</span> 麾下，弟子 <span className="dynamic-gold">{result.name}</span> 稽首。
                                 </div>
-                                <div className="flex overflow-x-auto gap-2 pb-2 mb-2 custom-scrollbar font-black">
-                                    {DICTIONARY_DATA.map(g => (
-                                        <button key={g.id} onClick={() => setGlossaryCategory(g.id)} className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] flex items-center gap-2 tab-btn ${glossaryCategory === g.id ? 'active' : 'text-zinc-600 bg-zinc-950 border border-zinc-900'}`}>{renderIcon(g.icon)} {g.category.split(' ')[0]}</button>
-                                    ))}
+                                <div id="ordination-certificate" className="ordination-paper rounded-2xl p-8 text-left font-serif-tc border border-amber-900/20 shadow-2xl">
+                                    <div className="text-center border-b border-amber-900/20 pb-8 mb-10">
+                                        <span className="text-amber-50 tracking-[1.5em] text-[10px] font-sans block mb-4">萬法宗壇</span>
+                                        <h2 className="font-black text-amber-100 tracking-[0.2em] text-3xl italic">職官分發告牒</h2>
+                                    </div>
+                                    <div className="space-y-10 text-lg">
+                                        <div><span className="text-label block mb-2 font-sans">一 奏 受</span><div className="pl-4 border-l border-amber-900/30">太上三五都功經籙 <span className="dynamic-gold">{result.fullRole}</span></div></div>
+                                        <div><span className="text-label block mb-2 font-sans">一 補 充</span><div className="pl-4 border-l border-amber-900/30"><span className="dynamic-gold">{result.office}</span> 兼 <span className="dynamic-gold">{result.dt}</span></div></div>
+                                        <div className="bg-[#0a0a0a] p-4 rounded-lg"><span className="italic block mb-2 opacity-60 font-sans text-xs">配屬數據：</span><span className="dynamic-gold">{result.hl.mountain}{result.hl.emperor}{result.hl.qi}</span> 炁真人，配屬北斗 <span className="dynamic-gold">{result.st}</span> 星君</div>
+                                    </div>
                                 </div>
-                                <div className="space-y-3">
-                                    {filteredTerms.length > 0 ? filteredTerms.map((item, i) => (
-                                        <div key={i} className="glossary-card p-4 rounded-xl border-l-2 border-l-amber-600/40">
-                                            <h4 className="text-amber-200 font-black mb-1">{item.term}</h4>
-                                            <p className="text-zinc-400 text-xs leading-relaxed">{item.meaning}</p>
-                                        </div>
-                                    )) : <div className="py-20 text-center text-zinc-800 italic font-sans">無匹配條目</div>}
-                                </div>
+                                <button onClick={handleSavePDF} className="w-full mt-10 bg-amber-600 text-black py-4 rounded-xl font-black font-sans no-print tracking-widest uppercase shadow-xl active:scale-95 transition-all">儲存 PDF 牒文</button>
                             </div>
                         )}
 
-                        {tab === 'result' && result && <ResultView result={result} setTab={setTab} onSavePDF={handleSavePDF} />}
-
                         {tab === 'catalog' && (
                             <div className="animate-in slide-in-from-right duration-500 font-sans text-zinc-300">
-                                <h2 className="text-xl font-black text-amber-100 tracking-widest border-l-4 border-amber-600 pl-4 mb-6 text-left">元帥全錄</h2>
-                                <div className="relative mb-6">
-                                    <Icon name="Search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-700" />
-                                    <input className="w-full bg-black border border-zinc-900 rounded-xl py-4 pl-12 pr-4 font-bold text-amber-50 outline-none focus:border-amber-600" placeholder="搜尋..." value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3 h-[70vh] overflow-y-auto custom-scrollbar">
+                                <h2 className="text-xl font-black text-amber-100 border-l-4 border-amber-600 pl-4 mb-6 text-left font-sans">元帥全錄映射</h2>
+                                <input className="w-full bg-black border border-zinc-900 rounded-xl py-4 pl-4 font-bold text-amber-50 mb-6 outline-none focus:border-amber-600" placeholder="搜尋..." value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} />
+                                <div className="grid grid-cols-2 gap-3 h-[60vh] overflow-y-auto custom-scrollbar">
                                     {JIAZI_60.map((name, index) => {
                                         const m = MARSHAL_CANON[getMarshalIdxByOffset(index)];
                                         if (catalogQuery && !m.name.includes(catalogQuery)) return null;
                                         return (
                                             <div key={index} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900">
-                                                <span className="text-zinc-600 text-[10px] block font-black font-sans">#{m.rank}</span>
-                                                <span className="text-amber-600 font-black italic font-serif">{m.name}</span>
+                                                <span className="text-zinc-600 text-[10px] block font-black">#{m.rank}</span>
+                                                <span className="text-amber-600 font-black italic">{m.name}</span>
                                             </div>
                                         );
                                     })}
@@ -586,6 +525,7 @@
                             </div>
                         )}
                     </main>
+
                     <Navigation activeTab={tab} setTab={setTab} />
                 </div>
             );
