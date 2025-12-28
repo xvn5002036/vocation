@@ -12,15 +12,16 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        /* 強制全域文字大小為 14px */
-        * {
-            font-size: 14px !important;
-        }
+        /* 基礎設定：預設文字大小 14px */
         body {
             background-color: #010101;
             color: #e5d5b0;
             font-family: 'Noto Serif TC', serif;
             -webkit-font-smoothing: antialiased;
+            font-size: 14px;
+        }
+        input, select, button, p, span, div {
+            font-size: 14px;
         }
         .custom-scrollbar::-webkit-scrollbar { width: 3px; background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
@@ -40,11 +41,46 @@
             background: linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
             pointer-events: none;
         }
+        /* 特殊樣式：標題加大 */
+        .text-rank-large {
+            font-size: 20px !important;
+            font-weight: 700;
+            color: #ffffff !important;
+        }
+        /* 特殊樣式：元命元辰內容適中稍大 */
+        .text-meta-medium {
+            font-size: 18px !important;
+            font-weight: 500;
+            color: #fefefa !important;
+        }
+        /* 特殊樣式：具體職銜、壇靖與都領炁極大化 */
+        .text-role-extra-large {
+            font-size: 24px !important;
+            font-weight: 900;
+            color: #fefefa !important;
+            line-height: 1.4;
+            display: block;
+            margin-top: 8px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        /* 特殊樣式：主帥名號極大化 */
+        .marshal-title-large {
+            font-size: 32px !important;
+            font-weight: 900;
+            color: #fefefa !important;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+        /* 列印樣式 */
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; color: black !important; }
             .ordination-paper { background: white !important; border: 2px solid #8a2318 !important; box-shadow: none !important; }
             * { color: black !important; font-size: 14px !important; }
+            .text-rank-large { font-size: 18px !important; }
+            .text-meta-medium { font-size: 16px !important; }
+            .text-role-extra-large { font-size: 20px !important; }
+            .marshal-title-large { font-size: 28px !important; }
         }
         input, select {
             background: #000 !important;
@@ -59,7 +95,7 @@
     <script type="text/babel">
         const { useState } = React;
 
-        // --- 核心法統數據庫：包含動態前綴、官署、壇靖等 43 位元帥資料 ---
+        // --- 核心法統數據庫：43位元帥動態填發基準 ---
         const MARSHAL_CANON = [
             { rank: 1, name: "王靈官", prefix: "都天糾察", rolePrefix: "都天糾察", palace: "都天", office: "知天曹紀錄司", duty: "通天糾察事", zhi: "陽平", altar: "玉堂贊化", jing: "降真集靈" },
             { rank: 2, name: "馬元帥", prefix: "斗口靈官", rolePrefix: "紫府掌", palace: "善仙", office: "知天曹紀錄司", duty: "三界便宜事", zhi: "葛璝", altar: "三界集神", jing: "洞真自然" }, // 1987 基準
@@ -155,7 +191,6 @@
                         id: Date.now(), ...form, jiazi, marshal: m.name, prefix: m.prefix, rk: m.rank,
                         al: m.altar, jn: m.jing, zh: m.zhi, dt: m.duty, pl: m.palace, office: m.office, rolePrefix: m.rolePrefix,
                         st: STAR_MAPPING[jiazi[1]], hl, dl: duling,
-                        // 修正仙官之職與淑人之位
                         fullRole: form.gender === '男生' ? `${m.rolePrefix}${m.palace}仙官之職` : `封受${m.palace}淑人之位`,
                         timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     };
@@ -178,7 +213,7 @@
                             <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setMenuOpen(false)}></div>
                             <div className="relative w-64 bg-[#0a0a0a] border-r border-amber-900/40 h-full p-8 flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 font-sans">
                                 <h2 className="text-amber-500 italic mb-10 border-b border-amber-900/20 pb-4">系統目錄</h2>
-                                <nav className="space-y-6 flex-1">
+                                <nav className="space-y-6 flex-1 font-sans">
                                     <button onClick={() => {setTab('home'); setMenuOpen(false);}} className="w-full text-left p-4 rounded-xl border border-zinc-900 text-zinc-400">錄籍登記</button>
                                     <button onClick={() => {setTab('catalog'); setMenuOpen(false);}} className="w-full text-left p-4 rounded-xl border border-zinc-900 text-zinc-400">映射全錄</button>
                                 </nav>
@@ -206,10 +241,10 @@
                                         </div>
                                         <div className="grid grid-cols-2 gap-4 font-black">
                                             {['男生', '女生'].map(g => (
-                                                <button key={g} onClick={() => setForm({...form, gender: g})} className={`py-4 rounded-xl border transition-all ${form.gender === g ? 'bg-amber-950/40 border-amber-600 text-amber-100' : 'bg-black border-zinc-900 text-zinc-700'}`}>{g}</button>
+                                                <button key={g} onClick={() => setForm({...form, gender: g})} className={`py-4 rounded-xl border transition-all ${form.gender === g ? 'bg-amber-950/40 border-amber-600 text-amber-100 shadow-xl' : 'bg-black border-zinc-900 text-zinc-700'}`}>{g}</button>
                                             ))}
                                         </div>
-                                        <div className="grid grid-cols-3 gap-3 text-center">
+                                        <div className="grid grid-cols-3 gap-3 text-center font-black">
                                             <div className="bg-black p-3 rounded-xl border border-zinc-800">
                                                 <label className="block text-zinc-700 mb-1">西元</label>
                                                 <input type="number" className="w-full bg-transparent text-amber-500 text-center outline-none" value={form.year} onChange={e => setForm({...form, year: e.target.value})} />
@@ -246,51 +281,84 @@
                                             <h2 className="font-black text-amber-100 tracking-[0.3em] drop-shadow-2xl font-serif italic">職官分發告牒</h2>
                                         </div>
 
-                                        <div className="space-y-12 font-serif leading-relaxed text-zinc-300 px-2 font-black">
-                                            <div className="space-y-8">
-                                                <p className="flex flex-col space-y-2">
+                                        <div className="space-y-12 leading-relaxed text-zinc-300 px-2 font-black">
+                                            <div className="space-y-10 font-serif">
+                                                {/* 一奏受：換行、字體加大處理 */}
+                                                <div className="flex flex-col space-y-2">
                                                     <span className="text-amber-600 tracking-widest opacity-60 italic uppercase font-sans">一 奏 受</span>
-                                                    <span className="text-white pl-4 border-l-2 border-amber-900/40 py-1 leading-loose tracking-widest">
-                                                        太上三五都功經籙{result.fullRole}
-                                                    </span>
-                                                </p>
-                                                <p className="flex flex-col space-y-2">
+                                                    <div className="pl-4 border-l-2 border-amber-900/40 py-1">
+                                                        <span className="text-rank-large block">
+                                                            太上三五都功經籙
+                                                        </span>
+                                                        <span className="text-role-extra-large">
+                                                            {result.fullRole}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-col space-y-2">
                                                     <span className="text-amber-600 tracking-widest opacity-60 italic font-sans">一 補 充</span>
-                                                    <span className="text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1 font-serif">
-                                                        {result.office}兼{result.dt}為任
-                                                    </span>
-                                                </p>
-                                                <p className="flex flex-col space-y-2">
+                                                    <div className="pl-4 border-l-2 border-amber-900/40 py-1">
+                                                        {/* 一補充：分上下行顯示，並使用加大樣式 */}
+                                                        <span className="text-rank-large block">
+                                                            {result.office}
+                                                        </span>
+                                                        <span className="text-role-extra-large">
+                                                            兼{result.dt}為任
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-col space-y-2">
                                                     <span className="text-amber-600 tracking-widest opacity-60 italic font-sans">一 奏 立</span>
-                                                    <span className="text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1 font-serif">
-                                                        {result.al}壇{result.jn}靖
-                                                    </span>
-                                                </p>
-                                                <p className="flex flex-col space-y-2">
+                                                    <div className="pl-4 border-l-2 border-amber-900/40 py-1">
+                                                        {/* 一奏立：字體放大處理 */}
+                                                        <span className="text-role-extra-large">
+                                                            {result.al}壇{result.jn}靖
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-col space-y-2">
                                                     <span className="text-amber-600 tracking-widest opacity-60 italic font-sans">一 泰玄都省正一平炁宮</span>
-                                                    <span className="text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1 font-serif">
-                                                        係 天師{result.zh}治{result.dl}都領炁
-                                                    </span>
-                                                </p>
+                                                    <div className="pl-4 border-l-2 border-amber-900/40 py-1">
+                                                        {/* 一泰玄都省：字體放大處理 */}
+                                                        <span className="text-role-extra-large">
+                                                            係 天師{result.zh}治{result.dl}都領炁
+                                                        </span>
+                                                    </div>
+                                                </div>
                                                 
                                                 <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-zinc-900 shadow-inner font-serif">
-                                                    <div className="text-zinc-700 uppercase tracking-widest mb-4 font-sans italic opacity-40 text-[12px]">元命炁數 / 星君守護</div>
-                                                    <p className="text-amber-500 leading-loose tracking-widest">
-                                                        {result.hl.qi}炁君{result.hl.planet}三五步罡元命應{result.hl.master}先生<br/>
-                                                        {result.hl.mountain}{result.hl.emperor}{result.hl.qi}炁真人<br/>
-                                                        配屬本命北斗{result.st}星君
-                                                    </p>
+                                                    {/* 已重構：不全部擠在一起，改用垂直區塊分層排版，並將文字設定為適中稍大 (18px) */}
+                                                    <div className="flex flex-col space-y-5">
+                                                        <div className="pl-4 border-l-2 border-amber-900/20 py-1">
+                                                            <span className="text-meta-medium leading-relaxed block italic">
+                                                                {result.hl.qi}炁君{result.hl.planet}三五步罡元命應{result.hl.master}先生
+                                                            </span>
+                                                        </div>
+                                                        <div className="pl-4 border-l-2 border-amber-900/20 py-1">
+                                                            <span className="text-meta-medium leading-relaxed block italic">
+                                                                {result.hl.mountain}{result.hl.emperor}{result.hl.qi}炁真人
+                                                            </span>
+                                                        </div>
+                                                        <div className="pl-4 border-l-2 border-amber-900/20 py-1">
+                                                            <span className="text-meta-medium leading-relaxed block italic">
+                                                                配屬本命北斗{result.st}星君
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
 
                                                 <p className="flex flex-col space-y-4 pt-10 border-t border-zinc-900/50">
                                                     <span className="text-amber-600 tracking-widest uppercase opacity-60 italic font-sans">一 奏 撥</span>
-                                                    <span className="text-amber-100 pl-4 py-2 drop-shadow-xl tracking-widest leading-normal">
-                                                        {result.prefix}{result.marshal}麾下
-                                                    </span>
+                                                    <div className="flex flex-col pl-4 py-2 border-l-2 border-amber-900/40">
+                                                        <span className="marshal-title-large">
+                                                            {result.prefix}{result.marshal}
+                                                        </span>
+                                                        <span className="text-amber-100/60 mt-1 tracking-widest font-sans uppercase">麾下</span>
+                                                    </div>
                                                 </p>
-                                            </div>
-                                            <div className="text-center text-amber-900/40 font-sans mt-16 pt-10 border-t border-zinc-900/50 tracking-[0.4em] italic">
-                                                核於 {result.timeStr} • 萬神咸聽
                                             </div>
                                         </div>
 
@@ -305,12 +373,12 @@
 
                         {tab === 'catalog' && (
                             <div className="animate-in slide-in-from-right duration-500 pb-40 space-y-6">
-                                <h2 className="italic border-l-4 border-amber-600 pl-4 tracking-widest text-amber-100 font-serif">法統全錄映射 (可搜西元)</h2>
-                                <div className="relative font-sans">
+                                <h2 className="italic border-l-4 border-amber-600 pl-4 tracking-widest text-amber-100 font-serif font-black">法統全錄映射 (可搜西元)</h2>
+                                <div className="relative font-sans font-black">
                                     <input className="w-full bg-black border border-zinc-900 rounded-xl py-3 px-4 font-bold text-amber-50 shadow-2xl outline-none focus:border-amber-600" placeholder="搜尋：1987、丁卯、或元帥名..." value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} />
                                 </div>
-                                <div className="bg-[#0a0a0a] rounded-2xl border border-zinc-900 p-4 shadow-2xl font-black">
-                                    <div className="grid grid-cols-2 gap-3 h-[70vh] overflow-y-auto custom-scrollbar px-1 font-sans">
+                                <div className="bg-[#0a0a0a] rounded-2xl border border-zinc-900 p-4 shadow-2xl font-black font-sans">
+                                    <div className="grid grid-cols-2 gap-3 h-[70vh] overflow-y-auto custom-scrollbar px-1">
                                         {JIAZI_60.map((name, index) => {
                                             const cycleYear = 1984 + index;
                                             const m = MARSHAL_CANON[getMarshalIdx(index)];
@@ -339,7 +407,6 @@
                         )}
                     </main>
 
-                    {/* Footer Nav */}
                     <nav className="fixed bottom-0 left-0 right-0 bg-black backdrop-blur-3xl border-t border-amber-900/20 p-4 pb-8 z-50 max-w-md mx-auto rounded-t-[2.5rem] shadow-2xl no-print font-sans font-black">
                         <div className="flex justify-around items-center">
                             <button onClick={() => setTab('home')} className={`flex flex-col items-center space-y-1 px-10 transition-all relative ${tab === 'home' || tab === 'result' ? 'text-amber-400 scale-110' : 'text-zinc-700'}`}>
