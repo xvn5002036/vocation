@@ -63,9 +63,9 @@
             { rank: 17, name: "李元帥", prefix: "鎮元大將", palace: "鎮元", duty: "地脈安鎮事", zhi: "稠稉", altar: "地靈穩靖", jing: "安土地祇" },
             { rank: 18, name: "高元帥", prefix: "宣化真君", palace: "宣化", duty: "教門弘法事", zhi: "真多", altar: "正法演音", jing: "弘道宣化" },
             { rank: 19, name: "周元帥", prefix: "保仙元帥", palace: "保仙", duty: "境內巡察事", zhi: "昌利", altar: "太平護民", jing: "巡遊糾察" },
-            { rank: 20, name: "謝元帥", prefix: "廣澤宮將", palace: "廣澤", duty: "江河潤澤事", zhi: "棣上", altar: "水雲降澤", jing: "洪恩廣佈" },
-            { rank: 21, name: "任元帥", prefix: "無極元帥", palace: "無極", duty: "乾坤調和事", zhi: "湧泉", altar: "兩儀交泰", jing: "無為自然" },
-            { rank: 22, name: "寧元帥", prefix: "慈航元帥", palace: "慈航", duty: "濟度沉淪事", zhi: "本竹", altar: "慈航渡厄", jing: "救苦尋聲" },
+            { rank: 20, name: "謝元帥", palace: "廣澤宮將", palace: "廣澤", duty: "江河潤澤事", zhi: "棣上", altar: "水雲降澤", jing: "洪恩廣佈" },
+            { rank: 21, name: "任元帥", palace: "無極元帥", palace: "無極", duty: "乾坤調和事", zhi: "湧泉", altar: "兩儀交泰", jing: "無為自然" },
+            { rank: 22, name: "寧元帥", palace: "慈航元帥", palace: "慈航", duty: "濟度沉淪事", zhi: "本竹", altar: "慈航渡厄", jing: "救苦尋聲" },
             { rank: 23, name: "藍元帥", prefix: "長生真君", palace: "長生", duty: "藥道開展事", zhi: "白鹿", altar: "百草靈丹", jing: "長生保命" },
             { rank: 24, name: "朱元帥", prefix: "忠義元帥", palace: "忠義", duty: "綱常維護事", zhi: "岡坻", altar: "倫常演禮", jing: "守信不二" },
             { rank: 25, name: "鄭元帥", prefix: "威靈元帥", palace: "威靈", duty: "妖邪掃除事", zhi: "蒙秦", altar: "威靈顯應", jing: "伏魔除暴" },
@@ -133,7 +133,8 @@
                         id: Date.now(), ...form, jiazi, marshal: m.name, prefix: m.prefix, rk: m.rank,
                         al: m.altar, jn: m.jing, zh: m.zhi, dt: m.duty,
                         st: STAR_MAPPING[jiazi[1]], hl, dl: duling,
-                        fullRole: form.gender === '男生' ? `${palaceBase}仙仙官之職` : `${palaceBase}淑人人之位`,
+                        // 修正後的職銜邏輯：將仙仙官改為仙官，移除多餘文字
+                        fullRole: form.gender === '男生' ? `${palaceBase}仙官之職` : `${palaceBase}淑人之位`,
                         timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     };
                     setResult(output);
@@ -144,20 +145,20 @@
 
             return (
                 <div className="flex flex-col min-h-screen">
-                    {/* Header: 調小高度 */}
+                    {/* Header */}
                     <header className="sticky top-0 z-50 bg-black/95 border-b border-amber-900/30 px-6 py-3 flex justify-center items-center shadow-xl no-print">
-                        <h1 className="text-base font-black tracking-[0.2em] text-amber-500 italic">正一萬法宗壇職官法典</h1>
+                        <h1 className="text-base font-black tracking-[0.2em] text-amber-500 italic">正一職官法典系統</h1>
                     </header>
 
                     <main className="max-w-md mx-auto px-4 py-6 flex-1 w-full pb-24">
                         {currentTab === 'home' && (
                             <div className="space-y-6 animate-in fade-in duration-500">
                                 <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-zinc-900 shadow-2xl relative overflow-hidden">
-                                    <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4 font-sans text-xs">
+                                    <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4 font-sans text-20px">
                                         <span className="font-bold tracking-widest text-amber-100 uppercase italic">錄 籍 申 奏</span>
                                         <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800">
                                             {['solar', 'lunar'].map(m => (
-                                                <button key={m} onClick={() => setForm({...form, calendar: m})} className={`px-4 py-1.5 rounded-md text-[10px] font-black transition-all ${form.calendar === m ? 'bg-amber-900 text-white' : 'text-zinc-700'}`}>{m === 'solar' ? '國' : '農'}</button>
+                                                <button key={m} onClick={() => setForm({...form, calendar: m})} className={`px-4 py-1.5 rounded-md text-[18px] font-black transition-all ${form.calendar === m ? 'bg-amber-900 text-white' : 'text-zinc-700'}`}>{m === 'solar' ? '國' : '農'}</button>
                                             ))}
                                         </div>
                                     </div>
@@ -168,19 +169,18 @@
                                             <input className="w-full bg-black border border-zinc-800 rounded-xl py-3 px-4 font-bold text-lg text-amber-50 outline-none focus:border-amber-600 shadow-inner" placeholder="姓名" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
-                                            {/* 改為男生女生 */}
                                             {['男生', '女生'].map(g => (
                                                 <button key={g} onClick={() => setForm({...form, gender: g})} className={`py-4 rounded-xl font-black text-sm border transition-all ${form.gender === g ? 'bg-amber-950/40 border-amber-600 text-amber-100 shadow-xl' : 'bg-black border-zinc-900 text-zinc-700'}`}>{g}</button>
                                             ))}
                                         </div>
                                         <div className="grid grid-cols-3 gap-3">
-                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[10px] text-zinc-700 mb-1">年份</label><input type="number" className="w-full bg-transparent font-bold text-amber-500 text-xl text-center outline-none" value={form.year} onChange={e => setForm({...form, year: e.target.value})} /></div>
-                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[10px] text-zinc-700 mb-1">月份</label><select className="w-full bg-transparent font-bold text-amber-100 text-lg appearance-none outline-none text-center" value={form.month} onChange={e => setForm({...form, month: e.target.value})}>{Array.from({length: 12}, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}</option>)}</select></div>
-                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[10px] text-zinc-700 mb-1">日期</label><select className="w-full bg-transparent font-bold text-amber-100 text-lg appearance-none outline-none text-center" value={form.day} onChange={e => setForm({...form, day: e.target.value})}>{Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d}>{d}</option>)}</select></div>
+                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[18px] text-zinc-700 mb-1">年份</label><input type="number" className="w-full bg-transparent font-bold text-amber-500 text-xl text-center outline-none" value={form.year} onChange={e => setForm({...form, year: e.target.value})} /></div>
+                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[18px] text-zinc-700 mb-1">月份</label><select className="w-full bg-transparent font-bold text-amber-100 text-lg appearance-none outline-none text-center" value={form.month} onChange={e => setForm({...form, month: e.target.value})}>{Array.from({length: 12}, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}</option>)}</select></div>
+                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[18px] text-zinc-700 mb-1">日期</label><select className="w-full bg-transparent font-bold text-amber-100 text-lg appearance-none outline-none text-center" value={form.day} onChange={e => setForm({...form, day: e.target.value})}>{Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d}>{d}</option>)}</select></div>
                                         </div>
                                         <div className="grid grid-cols-4 gap-2">
                                             {["子時", "丑時", "寅時", "卯時", "辰時", "巳時", "午時", "未時", "申時", "酉時", "戌時", "亥時"].map(s => (
-                                                <button key={s} onClick={() => setForm({...form, hour: s})} className={`py-2 rounded-xl text-[10px] font-black border transition-all ${form.hour === s ? 'bg-amber-600 text-black border-amber-400 scale-105' : 'bg-black/40 border-zinc-900 text-zinc-700'}`}>{s}</button>
+                                                <button key={s} onClick={() => setForm({...form, hour: s})} className={`py-2 rounded-xl text-[14px] font-black border transition-all ${form.hour === s ? 'bg-amber-600 text-black border-amber-400 scale-105' : 'bg-black/40 border-zinc-900 text-zinc-700'}`}>{s}</button>
                                             ))}
                                         </div>
                                     </div>
@@ -269,7 +269,6 @@
                                     <input className="w-full bg-black border border-zinc-900 rounded-xl py-3 px-4 font-bold text-amber-50 shadow-2xl outline-none focus:border-amber-600 text-sm" placeholder="搜尋年份/甲子..." value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} />
                                 </div>
                                 <div className="bg-[#0a0a0a] rounded-2xl border border-zinc-900 p-4 shadow-2xl">
-                                    {/* 改為雙排緊湊型網格 */}
                                     <div className="grid grid-cols-2 gap-3 h-[70vh] overflow-y-auto custom-scrollbar px-1">
                                         {JIAZI_60.map((name, index) => {
                                             if (catalogQuery && !name.includes(catalogQuery)) return null;
