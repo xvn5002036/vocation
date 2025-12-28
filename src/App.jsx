@@ -265,19 +265,50 @@ const assistantMarshals = marshalResult.assistants || [];
       </section>
 
       {/* 元帥預覽 */}
-      <section className="mt-6 rounded-lg border bg-white/60 p-4">
-        <h2 className="font-bold mb-3">元帥資料庫（預覽）</h2>
-        <div className="space-y-3">
-          {marshalPreview.map((m) => (
-            <div key={m.id} className="rounded border bg-orange-50 p-3">
-              <div className="font-bold text-orange-800">
-                {m.name}／{m.title}
-              </div>
-              <div className="text-sm mt-1">{m.visualization}</div>
+<section className="mt-6 rounded-lg border bg-white/60 p-4">
+  <h2 className="font-bold mb-4">法壇元帥配置</h2>
+
+  {/* 主壇元帥 */}
+  {mainMarshal && (
+    <div className="mb-4 rounded border bg-orange-50 p-4">
+      <div className="mb-2 text-lg font-bold text-orange-800">
+        主壇元帥：{mainMarshal.name}（{mainMarshal.title}）
+      </div>
+
+      <div className="text-sm text-gray-800 mb-1">
+        <span className="font-bold">存思觀想：</span>
+        {mainMarshal.visualization}
+      </div>
+      <div className="text-sm text-gray-800 mb-1">
+        <span className="font-bold">印契手訣：</span>
+        {mainMarshal.mudra}
+      </div>
+      <div className="text-sm text-gray-800">
+        <span className="font-bold">咒語指引：</span>
+        {mainMarshal.mantra}
+      </div>
+    </div>
+  )}
+
+  {/* 輔壇元帥 */}
+  {assistantMarshals.length > 0 && (
+    <div>
+      <div className="mb-2 font-bold">輔壇元帥</div>
+      <div className="space-y-3">
+        {assistantMarshals.map((m) => (
+          <div key={m.id} className="rounded border bg-orange-50 p-3">
+            <div className="font-bold text-orange-800">
+              {m.name}（{m.title}）
             </div>
-          ))}
-        </div>
-      </section>
+            <div className="text-sm text-gray-700 mt-1">
+              {m.visualization}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</section>
     </div>
   );
 }
