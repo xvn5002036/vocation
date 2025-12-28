@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>正一萬法宗壇職官法典系統</title>
+    <!-- 引入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 React 與 Babel CDN -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
     <style>
+        /* 強制全局文字大小為 14px */
+        * {
+            font-size: 14px !important;
+        }
         body {
             background-color: #010101;
             color: #e5d5b0;
@@ -34,6 +40,19 @@
             background: linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
             pointer-events: none;
         }
+        /* 列印樣式 */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .ordination-paper { background: white !important; border: 2px solid #8a2318 !important; box-shadow: none !important; }
+            * { color: black !important; font-size: 14px !important; }
+        }
+        /* 輸入框與選擇框背景修正 */
+        input, select {
+            background: #000 !important;
+            color: #fff !important;
+            border: 1px solid #333 !important;
+        }
     </style>
 </head>
 <body>
@@ -42,68 +61,75 @@
     <script type="text/babel">
         const { useState } = React;
 
-        // --- 核心數據：四十三位元帥法統 (遵循您的馬元帥基準資料補齊) ---
+        // --- 核心法統數據庫：包含動態前綴、官署、壇靖等 ---
         const MARSHAL_CANON = [
-            { rank: 1, name: "王靈官", prefix: "都天糾察", palace: "都天", duty: "通天糾察事", zhi: "陽平", altar: "玉堂贊化", jing: "降真集靈" },
-            { rank: 2, name: "馬元帥", prefix: "斗口靈官", palace: "善仙", duty: "三界便宜事", zhi: "葛璝", altar: "三界集神", jing: "洞真自然" }, // 1987 基準
-            { rank: 3, name: "趙元帥", prefix: "玄壇真君", palace: "玄壇", duty: "金輪執法事", zhi: "鶴鳴", altar: "玄一守道", jing: "凝神志道" },
-            { rank: 4, name: "溫元帥", prefix: "地祇主將", palace: "玉京", duty: "幽冥督察事", zhi: "女几", altar: "紫微承慶", jing: "太上玄妙" }, 
-            { rank: 5, name: "關元帥", prefix: "義勇武安", palace: "崇寧", duty: "義勇巡查事", zhi: "上清", altar: "武德演法", jing: "威靈感應" },
-            { rank: 6, name: "殷元帥", prefix: "至德太歲", palace: "太歲", duty: "至德考較事", zhi: "蓋竹", altar: "太極宣化", jing: "延生保命" }, 
-            { rank: 7, name: "岳元帥", prefix: "精忠武穆", palace: "精忠", duty: "兵戈鎮壓事", zhi: "雲台", altar: "忠義護國", jing: "靖難平亂" },
-            { rank: 8, name: "康元帥", prefix: "仁聖元帥", palace: "仁聖", duty: "生靈保命事", zhi: "浕口", altar: "慈悲度世", jing: "保生益壽" },
-            { rank: 9, name: "辛元帥", prefix: "雷霆判官", palace: "雷霆", duty: "電火威權事", zhi: "后城", altar: "雷音演教", jing: "神霄輔化" },
-            { rank: 10, name: "鄧元帥", prefix: "律令大神", palace: "律令", duty: "五雷執行事", zhi: "公慕", altar: "五雷執法", jing: "震威攝邪" },
-            { rank: 11, name: "張元帥", prefix: "南斗星君", palace: "南斗", duty: "延生註錄事", zhi: "平岡", altar: "長生注壽", jing: "玄樞密運" },
-            { rank: 12, name: "陶元帥", prefix: "北斗星君", palace: "北斗", duty: "消災解厄事", zhi: "主簿", altar: "北斗禳災", jing: "星輝護體" },
-            { rank: 13, name: "龐元帥", prefix: "混元使者", palace: "混元", duty: "陰陽判斷事", zhi: "玉堂", altar: "混元一氣", jing: "太初歸真" },
-            { rank: 14, name: "劉元帥", prefix: "紫微大將", palace: "紫微", duty: "星辰運作事", zhi: "北邙", altar: "星漢昭輝", jing: "紫府神光" },
-            { rank: 15, name: "苟元帥", prefix: "天樞使者", palace: "天樞", duty: "樞機密運事", zhi: "縑山", altar: "天樞密旨", jing: "玄機內運" },
-            { rank: 16, name: "畢元帥", prefix: "神霄判官", palace: "神霄", duty: "火符傳遞事", zhi: "渠亭", altar: "神霄火雲", jing: "流金火鈴" },
-            { rank: 17, name: "李元帥", prefix: "鎮元大將", palace: "鎮元", duty: "地脈安鎮事", zhi: "稠稉", altar: "地靈穩靖", jing: "安土地祇" },
-            { rank: 18, name: "高元帥", prefix: "宣化真君", palace: "宣化", duty: "教門弘法事", zhi: "真多", altar: "正法演音", jing: "弘道宣化" },
-            { rank: 19, name: "周元帥", prefix: "保仙元帥", palace: "保仙", duty: "境內巡察事", zhi: "昌利", altar: "太平護民", jing: "巡遊糾察" },
-            { rank: 20, name: "謝元帥", palace: "廣澤宮將", palace: "廣澤", duty: "江河潤澤事", zhi: "棣上", altar: "水雲降澤", jing: "洪恩廣佈" },
-            { rank: 21, name: "任元帥", palace: "無極元帥", palace: "無極", duty: "乾坤調和事", zhi: "湧泉", altar: "兩儀交泰", jing: "無為自然" },
-            { rank: 22, name: "寧元帥", palace: "慈航元帥", palace: "慈航", duty: "濟度沉淪事", zhi: "本竹", altar: "慈航渡厄", jing: "救苦尋聲" },
-            { rank: 23, name: "藍元帥", prefix: "長生真君", palace: "長生", duty: "藥道開展事", zhi: "白鹿", altar: "百草靈丹", jing: "長生保命" },
-            { rank: 24, name: "朱元帥", prefix: "忠義元帥", palace: "忠義", duty: "綱常維護事", zhi: "岡坻", altar: "倫常演禮", jing: "守信不二" },
-            { rank: 25, name: "鄭元帥", prefix: "威靈元帥", palace: "威靈", duty: "妖邪掃除事", zhi: "蒙秦", altar: "威靈顯應", jing: "伏魔除暴" },
-            { rank: 26, name: "金元帥", prefix: "開元真君", palace: "開元", duty: "金石鑄造事", zhi: "陽平", altar: "精金淬煉", jing: "法器莊嚴" },
-            { rank: 27, name: "黃元帥", prefix: "坤元元帥", palace: "坤元", duty: "厚德載物事", zhi: "鹿堂", altar: "后土坤載", jing: "承天效法" },
-            { rank: 28, name: "曾元帥", prefix: "三元使者", palace: "三元", duty: "考校功過事", zhi: "鶴鳴", altar: "三官考較", jing: "賜福赦罪" },
-            { rank: 29, name: "孟元帥", prefix: "武聖元帥", palace: "武聖", duty: "甲兵操練事", zhi: "女几", altar: "神武衛道", jing: "威鎮海岱" },
-            { rank: 30, name: "鐵元帥", prefix: "剛義元帥", palace: "剛義", duty: "五金司掌事", zhi: "上清", altar: "剛正不阿", jing: "金光護法" },
-            { rank: 31, name: "苟元帥", prefix: "太清使者", palace: "太清", duty: "道德傳承事", zhi: "蓋竹", altar: "玄德演教", jing: "清靜開道" },
-            { rank: 32, name: "玉元帥", prefix: "玉虛大將", palace: "玉虛", duty: "玄通感應事", zhi: "雲台", altar: "玉虛朝聖", jing: "感應道交" },
-            { rank: 33, name: "石元帥", prefix: "石靈元帥", palace: "石靈", duty: "山嶽鎮守事", zhi: "浕口", altar: "五嶽朝天", jing: "盤石安穩" },
-            { rank: 34, name: "常元帥", prefix: "常存真君", palace: "常存", duty: "恆久法界事", zhi: "后城", altar: "永恆法脈", jing: "不生不滅" },
-            { rank: 35, name: "何元帥", prefix: "三教元帥", palace: "三教", duty: "儒道釋和事", zhi: "公慕", altar: "三教並圓", jing: "大同世界" },
-            { rank: 36, name: "姚元帥", prefix: "廣德真君", palace: "廣德", duty: "施予福報事", zhi: "平岡", altar: "大德廣生", jing: "福緣廣佈" },
-            { rank: 37, name: "伍元帥", prefix: "威猛元帥", palace: "威猛", duty: "伏虎降龍事", zhi: "主簿", altar: "剛勇降魔", jing: "威武不屈" },
-            { rank: 38, name: "卜元帥", prefix: "玄機使者", palace: "玄機", duty: "易理推衍事", zhi: "玉堂", altar: "先天術數", jing: "河洛神機" },
-            { rank: 39, name: "雷元帥", prefix: "雷鳴元帥", palace: "雷鳴", duty: "九天震動事", zhi: "北邙", altar: "九天雷祖", jing: "響雷破幽" },
-            { rank: 40, name: "白元帥", prefix: "太白真君", palace: "太白", duty: "西方肅殺事", zhi: "縑山", altar: "白金肅靜", jing: "利劍斬妖" },
-            { rank: 41, name: "沈元帥", prefix: "隱元元帥", palace: "隱元", duty: "遁法施行事", zhi: "渠亭", altar: "奇門遁甲", jing: "隱顯莫測" },
-            { rank: 42, name: "郭元帥", prefix: "通明上相", palace: "通明", duty: "天門守衛事", zhi: "稠稉", altar: "通明上相", jing: "守衛仙都" },
-            { rank: 43, name: "王高元帥", palace: "萬福府", duty: "群仙考較事", zhi: "真多", altar: "萬壽無疆", jing: "福祿壽星" }
+            { rank: 1, name: "王靈官", prefix: "都天糾察", rolePrefix: "紫府掌", palace: "都天", office: "知天曹紀錄司", duty: "通天糾察事", zhi: "陽平", altar: "玉堂贊化", jing: "降真集靈" },
+            { rank: 2, name: "馬元帥", prefix: "斗口靈官", rolePrefix: "紫府掌", palace: "善仙", office: "知天曹紀錄司", duty: "三界便宜事", zhi: "葛璝", altar: "三界集神", jing: "洞真自然" }, // 1987 基準
+            { rank: 3, name: "趙元帥", prefix: "玄壇真君", rolePrefix: "知理刑", palace: "玄壇", office: "知理刑紫府司", duty: "金輪執法事", zhi: "鶴鳴", altar: "玄一守道", jing: "凝神志道" },
+            { rank: 4, name: "溫元帥", prefix: "地祇主將", rolePrefix: "紫府掌", palace: "玉京", office: "知天曹紀錄司", duty: "幽冥督察事", zhi: "女几", altar: "紫微承慶", jing: "太上玄妙" }, 
+            { rank: 5, name: "關元帥", prefix: "義勇武安", rolePrefix: "知軍目", palace: "崇寧", office: "知軍目武察司", duty: "義勇巡查事", zhi: "上清", altar: "武德演法", jing: "威靈感應" },
+            { rank: 6, name: "殷元帥", prefix: "至德太歲", rolePrefix: "紫府掌", palace: "太歲", office: "知天曹紀錄司", duty: "至德考較事", zhi: "蓋竹", altar: "太極宣化", jing: "延生保命" }, 
+            { rank: 7, name: "岳元帥", prefix: "精忠武穆", rolePrefix: "知忠義", palace: "精忠", office: "知忠義糾察司", duty: "兵戈鎮壓事", zhi: "雲台", altar: "忠義護國", jing: "靖難平亂" },
+            { rank: 8, name: "康元帥", prefix: "仁聖元帥", rolePrefix: "紫府掌", palace: "仁聖", office: "知天曹紀錄司", duty: "生靈保命事", zhi: "浕口", altar: "慈悲度世", jing: "保生益壽" },
+            { rank: 9, name: "辛元帥", prefix: "雷霆判官", rolePrefix: "知雷霆", palace: "雷霆", office: "知雷霆司", duty: "電火威權事", zhi: "后城", altar: "雷音演教", jing: "神霄輔化" },
+            { rank: 10, name: "鄧元帥", prefix: "律令大神", rolePrefix: "知律令", palace: "律令", office: "知律令司", duty: "五雷執行事", zhi: "公慕", altar: "五雷執法", jing: "震威攝邪" },
+            { rank: 11, name: "張元帥", prefix: "南斗星君", rolePrefix: "知南斗", palace: "南斗", office: "知南斗司", duty: "延生註錄事", zhi: "平岡", altar: "長生注壽", jing: "玄樞密運" },
+            { rank: 12, name: "陶元帥", prefix: "北斗星君", rolePrefix: "知北斗", palace: "北斗", office: "知北斗司", duty: "消災解厄事", zhi: "主簿", altar: "北斗禳災", jing: "星輝護體" },
+            { rank: 13, name: "龐元帥", prefix: "混元使者", rolePrefix: "知混元", palace: "混元", office: "知混元司", duty: "陰陽判斷事", zhi: "玉堂", altar: "混元一氣", jing: "太初歸真" },
+            { rank: 14, name: "劉元帥", prefix: "紫微大將", rolePrefix: "知星府", palace: "紫微", office: "知星府司", duty: "星辰運作事", zhi: "北邙", altar: "星漢昭輝", jing: "紫府神光" },
+            { rank: 15, name: "苟元帥", prefix: "天樞使者", rolePrefix: "知天樞", palace: "天樞", office: "知天樞司", duty: "樞機密運事", zhi: "縑山", altar: "天樞密旨", jing: "玄機內運" },
+            { rank: 16, name: "畢元帥", prefix: "神霄判官", rolePrefix: "知神霄", palace: "神霄", office: "知神霄司", duty: "火符傳遞事", zhi: "渠亭", altar: "神霄火雲", jing: "流金火鈴" },
+            { rank: 17, name: "李元帥", prefix: "鎮元大將", rolePrefix: "知地祇", palace: "鎮元", office: "知地祇司", duty: "地脈安鎮事", zhi: "稠稉", altar: "地靈穩靖", jing: "安土地祇" },
+            { rank: 18, name: "高元帥", prefix: "宣化真君", rolePrefix: "知教門", palace: "宣化", office: "知教門司", duty: "教門弘法事", zhi: "真多", altar: "正法演音", jing: "弘道宣化" },
+            { rank: 19, name: "周元帥", prefix: "保仙元帥", rolePrefix: "紫府掌", palace: "保仙", office: "知天曹紀錄司", duty: "境內巡察事", zhi: "昌利", altar: "太平護民", jing: "巡遊糾察" },
+            { rank: 20, name: "謝元帥", prefix: "廣澤宮將", rolePrefix: "紫府掌", palace: "廣澤", office: "知天曹紀錄司", duty: "江河潤澤事", zhi: "棣上", altar: "水雲降澤", jing: "洪恩廣佈" },
+            { rank: 21, name: "任元帥", prefix: "無極元帥", rolePrefix: "紫府掌", palace: "無極", office: "知天曹紀錄司", duty: "乾坤調和事", zhi: "湧泉", altar: "兩儀交泰", jing: "無為自然" },
+            { rank: 22, name: "寧元帥", prefix: "慈航元帥", rolePrefix: "紫府掌", palace: "慈航", office: "知天曹紀錄司", duty: "濟度沉淪事", zhi: "本竹", altar: "慈航渡厄", jing: "救苦尋聲" },
+            { rank: 23, name: "藍元帥", prefix: "長生真君", rolePrefix: "紫府掌", palace: "長生", office: "知天曹紀錄司", duty: "藥道開展事", zhi: "白鹿", altar: "百草靈丹", jing: "長生保命" },
+            { rank: 24, name: "朱元帥", prefix: "忠義元帥", rolePrefix: "紫府掌", palace: "忠義", office: "知天曹紀錄司", duty: "綱常維護事", zhi: "岡坻", altar: "倫常演禮", jing: "守信不二" },
+            { rank: 25, name: "鄭元帥", prefix: "威靈元帥", rolePrefix: "紫府掌", palace: "威靈", office: "知天曹紀錄司", duty: "妖邪掃除事", zhi: "蒙秦", altar: "威靈顯應", jing: "伏魔除暴" },
+            { rank: 26, name: "金元帥", prefix: "開元真君", rolePrefix: "紫府掌", palace: "開元", office: "知天曹紀錄司", duty: "金石鑄造事", zhi: "陽平", altar: "精金淬煉", jing: "法器莊嚴" },
+            { rank: 27, name: "黃元帥", prefix: "坤元元帥", rolePrefix: "紫府掌", palace: "坤元", office: "知天曹紀錄司", duty: "厚德載物事", zhi: "鹿堂", altar: "后土坤載", jing: "承天效法" },
+            { rank: 28, name: "曾元帥", prefix: "三元使者", rolePrefix: "紫府掌", palace: "三元", office: "知天曹紀錄司", duty: "考校功過事", zhi: "鶴鳴", altar: "三官考較", jing: "賜福赦罪" },
+            { rank: 29, name: "孟元帥", prefix: "武聖元帥", rolePrefix: "紫府掌", palace: "武聖", office: "知天曹紀錄司", duty: "甲兵操練事", zhi: "女几", altar: "神武衛道", jing: "威鎮海岱" },
+            { rank: 30, name: "鐵元帥", prefix: "剛義元帥", rolePrefix: "紫府掌", palace: "剛義", office: "知天曹紀錄司", duty: "五金司掌事", zhi: "上清", altar: "剛正不阿", jing: "金光護法" },
+            { rank: 31, name: "苟元帥", prefix: "太清使者", rolePrefix: "紫府掌", palace: "太清", office: "知天曹紀錄司", duty: "道德傳承事", zhi: "蓋竹", altar: "玄德演教", jing: "清靜開道" },
+            { rank: 32, name: "玉元帥", prefix: "玉虛大將", rolePrefix: "紫府掌", palace: "玉虛", office: "知天曹紀錄司", duty: "玄通感應事", zhi: "雲台", altar: "玉虛朝聖", jing: "感應道交" },
+            { rank: 33, name: "石元帥", prefix: "石靈元帥", rolePrefix: "紫府掌", palace: "石靈", office: "知天曹紀錄司", duty: "山嶽鎮守事", zhi: "浕口", altar: "五嶽朝天", jing: "盤石安穩" },
+            { rank: 34, name: "常元帥", prefix: "常存真君", rolePrefix: "紫府掌", palace: "常存", office: "知天曹紀錄司", duty: "恆久法界事", zhi: "后城", altar: "永恆法脈", jing: "不生不滅" },
+            { rank: 35, name: "何元帥", prefix: "三教元帥", rolePrefix: "紫府掌", palace: "三教", office: "知天曹紀錄司", duty: "儒道釋和事", zhi: "公慕", altar: "三教並圓", jing: "大同世界" },
+            { rank: 36, name: "姚元帥", prefix: "廣德真君", rolePrefix: "紫府掌", palace: "廣德", office: "知天曹紀錄司", duty: "施予福報事", zhi: "平岡", altar: "大德廣生", jing: "福緣廣佈" },
+            { rank: 37, name: "伍元帥", prefix: "威猛元帥", rolePrefix: "紫府掌", palace: "威猛", office: "知天曹紀錄司", duty: "伏虎降龍事", zhi: "主簿", altar: "剛勇降魔", jing: "威武不屈" },
+            { rank: 38, name: "卜元帥", prefix: "玄機使者", rolePrefix: "紫府掌", palace: "玄機", office: "知天曹紀錄司", duty: "易理推衍事", zhi: "玉堂", altar: "先天術數", jing: "河洛神機" },
+            { rank: 39, name: "雷元帥", prefix: "雷鳴元帥", rolePrefix: "紫府掌", palace: "雷鳴", office: "知天曹紀錄司", duty: "九天震動事", zhi: "北邙", altar: "九天雷祖", jing: "響雷破幽" },
+            { rank: 40, name: "白元帥", prefix: "太白真君", rolePrefix: "紫府掌", palace: "太白", office: "知天曹紀錄司", duty: "西方肅殺事", zhi: "縑山", altar: "白金肅靜", jing: "利劍斬妖" },
+            { rank: 41, name: "沈元帥", prefix: "隱元元帥", rolePrefix: "紫府掌", palace: "隱元", office: "知天曹紀錄司", duty: "遁法施行事", zhi: "渠亭", altar: "奇門遁甲", jing: "隱顯莫測" },
+            { rank: 42, name: "郭元帥", prefix: "通明上相", rolePrefix: "紫府掌", palace: "通明", office: "知天曹紀錄司", duty: "天門手衛事", zhi: "稠稉", altar: "通明上相", jing: "守衛仙都" },
+            { rank: 43, name: "王高元帥", prefix: "萬福真君", rolePrefix: "紫府掌", palace: "萬福", office: "知天曹紀錄司", duty: "群仙考較事", zhi: "真多", altar: "萬壽無疆", jing: "福祿壽星" }
         ];
 
         const JIAZI_60 = ["甲子", "乙丑", "丙寅", "丁卯", "戊辰", "己巳", "庚午", "辛未", "壬申", "癸酉", "甲戌", "乙亥", "丙子", "丁丑", "戊寅", "己卯", "庚辰", "辛巳", "壬午", "癸未", "甲申", "乙酉", "丙戌", "丁亥", "戊子", "己丑", "庚寅", "辛卯", "壬辰", "癸巳", "甲午", "乙未", "丙申", "丁酉", "戊戌", "己亥", "庚子", "辛丑", "壬寅", "癸卯", "甲辰", "乙巳", "丙午", "丁未", "戊申", "己酉", "庚戌", "辛亥", "壬子", "癸丑", "甲寅", "乙卯", "丙辰", "丁巳", "戊午", "己未", "庚申", "辛酉", "壬戌", "癸亥"];
-
         const STAR_MAPPING = { "子": "貪狼", "丑": "巨門", "寅": "祿存", "卯": "文曲", "辰": "廉貞", "巳": "武曲", "午": "破軍", "未": "武曲", "申": "廉貞", "酉": "文曲", "戌": "祿存", "亥": "巨門" };
+        
+        // --- 修正後的河洛映射：包含動態五嶽與先生號 ---
         const HELUO_MAPPING = {
-            "甲": { side: "東方", emperor: "青帝", qi: "九", planet: "蒼天" }, "乙": { side: "東方", emperor: "青帝", qi: "九", planet: "蒼天" },
-            "丙": { side: "南方", emperor: "赤帝", qi: "三", planet: "赤天" }, "丁": { side: "南方", emperor: "赤帝", qi: "三", planet: "赤天" },
-            "戊": { side: "中央", emperor: "黃帝", qi: "一", planet: "昊天" }, "己": { side: "中央", emperor: "黃帝", qi: "一", planet: "昊天" },
-            "庚": { side: "西方", emperor: "白帝", qi: "七", planet: "浩天" }, "辛": { side: "西方", emperor: "白帝", qi: "七", planet: "浩天" },
-            "壬": { side: "北方", emperor: "黑帝", qi: "五", planet: "玄天" }, "癸": { side: "北方", emperor: "黑帝", qi: "五", planet: "玄天" }
+            "甲": { side: "東方", emperor: "青帝", qi: "九", planet: "蒼天", mountain: "泰山", master: "妙玄" },
+            "乙": { side: "東方", emperor: "青帝", qi: "九", planet: "蒼天", mountain: "泰山", master: "妙玄" },
+            "丙": { side: "南方", emperor: "赤帝", qi: "三", planet: "赤天", mountain: "南嶽", master: "暢玄" },
+            "丁": { side: "南方", emperor: "赤帝", qi: "三", planet: "赤天", mountain: "南嶽", master: "暢玄" }, // 1987 基準
+            "戊": { side: "中央", emperor: "黃帝", qi: "一", planet: "昊天", mountain: "嵩山", master: "靈玄" },
+            "己": { side: "中央", emperor: "黃帝", qi: "一", planet: "昊天", mountain: "嵩山", master: "靈玄" },
+            "庚": { side: "西方", emperor: "白帝", qi: "七", planet: "浩天", mountain: "華山", master: "真玄" },
+            "辛": { side: "西方", emperor: "白帝", qi: "七", planet: "浩天", mountain: "華山", master: "真玄" },
+            "壬": { side: "北方", emperor: "黑帝", qi: "五", planet: "玄天", mountain: "恆山", master: "洞玄" },
+            "癸": { side: "北方", emperor: "黑帝", qi: "五", planet: "玄天", mountain: "恆山", master: "洞玄" }
         };
 
         const YANG_HOURS = ["子時", "寅時", "辰時", "午時", "申時", "戌時"];
 
         function App() {
-            const [currentTab, setCurrentTab] = useState('home');
+            const [tab, setTab] = useState('home');
+            const [menuOpen, setMenuOpen] = useState(false);
             const [form, setForm] = useState({ name: '', gender: '男生', calendar: 'solar', year: '1987', month: '4', day: '10', hour: '申時' });
             const [result, setResult] = useState(null);
             const [isSpinning, setIsSpinning] = useState(false);
@@ -127,18 +153,16 @@
                     const m = MARSHAL_CANON[getMarshalIdx(off)];
                     const duling = YANG_HOURS.includes(form.hour) ? "左" : "右";
                     const hl = HELUO_MAPPING[jiazi[0]];
-                    const palaceBase = m.palace;
                     
                     const output = {
                         id: Date.now(), ...form, jiazi, marshal: m.name, prefix: m.prefix, rk: m.rank,
-                        al: m.altar, jn: m.jing, zh: m.zhi, dt: m.duty,
+                        al: m.altar, jn: m.jing, zh: m.zhi, dt: m.duty, pl: m.palace, office: m.office,
                         st: STAR_MAPPING[jiazi[1]], hl, dl: duling,
-                        // 修正後的職銜邏輯：將仙仙官改為仙官，移除多餘文字
-                        fullRole: form.gender === '男生' ? `${palaceBase}仙官之職` : `${palaceBase}淑人之位`,
+                        fullRole: form.gender === '男生' ? `${m.rolePrefix}${m.palace}仙官之職` : `封受${m.palace}淑人之位`,
                         timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     };
                     setResult(output);
-                    setCurrentTab('result');
+                    setTab('result');
                     setIsSpinning(false);
                 }, 600);
             };
@@ -146,142 +170,159 @@
             return (
                 <div className="flex flex-col min-h-screen">
                     {/* Header */}
-                    <header className="sticky top-0 z-50 bg-black/95 border-b border-amber-900/30 px-6 py-3 flex justify-center items-center shadow-xl no-print">
-                        <h1 className="text-base font-black tracking-[0.2em] text-amber-500 italic">正一職官法典系統</h1>
+                    <header className="sticky top-0 z-50 bg-black border-b border-amber-900/30 px-6 py-4 flex justify-between items-center shadow-xl no-print">
+                        <button onClick={() => setMenuOpen(true)} className="p-2 text-amber-500 active:scale-75">選單</button>
+                        <h1 className="font-black tracking-widest text-amber-100 italic">正一職官法典系統</h1>
+                        <div className="w-8"></div>
                     </header>
 
+                    {/* Sidebar */}
+                    {menuOpen && (
+                        <div className="fixed inset-0 z-[100] flex">
+                            <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setMenuOpen(false)}></div>
+                            <div className="relative w-64 bg-[#0a0a0a] border-r border-amber-900/40 h-full p-8 flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 font-sans">
+                                <h2 className="text-amber-500 font-black italic mb-10 border-b border-amber-900/20 pb-4">系統目錄</h2>
+                                <nav className="space-y-6 flex-1">
+                                    <button onClick={() => {setTab('home'); setMenuOpen(false);}} className="w-full text-left p-4 rounded-xl border border-zinc-900 text-zinc-400">錄籍登記</button>
+                                    <button onClick={() => {setTab('catalog'); setMenuOpen(false);}} className="w-full text-left p-4 rounded-xl border border-zinc-900 text-zinc-400">映射全錄</button>
+                                </nav>
+                            </div>
+                        </div>
+                    )}
+
                     <main className="max-w-md mx-auto px-4 py-6 flex-1 w-full pb-24">
-                        {currentTab === 'home' && (
+                        {tab === 'home' && (
                             <div className="space-y-6 animate-in fade-in duration-500">
                                 <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-zinc-900 shadow-2xl relative overflow-hidden">
-                                    <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4 font-sans text-20px">
-                                        <span className="font-bold tracking-widest text-amber-100 uppercase italic">錄 籍 申 奏</span>
+                                    <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4 font-sans font-black">
+                                        <span className="tracking-widest text-amber-100 uppercase italic">錄 籍 申 奏</span>
                                         <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800">
                                             {['solar', 'lunar'].map(m => (
-                                                <button key={m} onClick={() => setForm({...form, calendar: m})} className={`px-4 py-1.5 rounded-md text-[18px] font-black transition-all ${form.calendar === m ? 'bg-amber-900 text-white' : 'text-zinc-700'}`}>{m === 'solar' ? '國' : '農'}</button>
+                                                <button key={m} onClick={() => setForm({...form, calendar: m})} className={`px-4 py-1.5 rounded-md font-black transition-all ${form.calendar === m ? 'bg-amber-900 text-white' : 'text-zinc-700'}`}>{m === 'solar' ? '國' : '農'}</button>
                                             ))}
                                         </div>
                                     </div>
 
-                                    <div className="space-y-6">
-                                        <div className="space-y-1 font-sans">
-                                            <label className="text-[11px] font-black text-zinc-600 uppercase tracking-widest ml-1">Disciple Name</label>
-                                            <input className="w-full bg-black border border-zinc-800 rounded-xl py-3 px-4 font-bold text-lg text-amber-50 outline-none focus:border-amber-600 shadow-inner" placeholder="姓名" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+                                    <div className="space-y-6 font-sans">
+                                        <div className="space-y-1">
+                                            <label className="font-black text-zinc-600 uppercase tracking-widest ml-1 italic">Disciple Name</label>
+                                            <input className="w-full bg-black border border-zinc-800 rounded-xl py-3 px-4 font-bold text-amber-50 outline-none focus:border-amber-600 shadow-inner" placeholder="姓名" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-2 gap-4 font-black">
                                             {['男生', '女生'].map(g => (
-                                                <button key={g} onClick={() => setForm({...form, gender: g})} className={`py-4 rounded-xl font-black text-sm border transition-all ${form.gender === g ? 'bg-amber-950/40 border-amber-600 text-amber-100 shadow-xl' : 'bg-black border-zinc-900 text-zinc-700'}`}>{g}</button>
+                                                <button key={g} onClick={() => setForm({...form, gender: g})} className={`py-4 rounded-xl border transition-all ${form.gender === g ? 'bg-amber-950/40 border-amber-600 text-amber-100 shadow-xl' : 'bg-black border-zinc-900 text-zinc-700'}`}>{g}</button>
                                             ))}
                                         </div>
                                         <div className="grid grid-cols-3 gap-3">
-                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[18px] text-zinc-700 mb-1">年份</label><input type="number" className="w-full bg-transparent font-bold text-amber-500 text-xl text-center outline-none" value={form.year} onChange={e => setForm({...form, year: e.target.value})} /></div>
-                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[18px] text-zinc-700 mb-1">月份</label><select className="w-full bg-transparent font-bold text-amber-100 text-lg appearance-none outline-none text-center" value={form.month} onChange={e => setForm({...form, month: e.target.value})}>{Array.from({length: 12}, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}</option>)}</select></div>
-                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center"><label className="block text-[18px] text-zinc-700 mb-1">日期</label><select className="w-full bg-transparent font-bold text-amber-100 text-lg appearance-none outline-none text-center" value={form.day} onChange={e => setForm({...form, day: e.target.value})}>{Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d}>{d}</option>)}</select></div>
+                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center font-black"><label className="block text-zinc-700 mb-1">年份</label><input type="number" className="w-full bg-transparent text-amber-500 text-center outline-none" value={form.year} onChange={e => setForm({...form, year: e.target.value})} /></div>
+                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center font-black"><label className="block text-zinc-700 mb-1">月份</label><select className="w-full bg-transparent font-bold text-amber-100 appearance-none outline-none text-center" value={form.month} onChange={e => setForm({...form, month: e.target.value})}>{Array.from({length: 12}, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}</option>)}</select></div>
+                                            <div className="bg-black p-3 rounded-xl border border-zinc-800 text-center font-black"><label className="block text-zinc-700 mb-1">日期</label><select className="w-full bg-transparent font-bold text-amber-100 appearance-none outline-none text-center" value={form.day} onChange={e => setForm({...form, day: e.target.value})}>{Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d}>{d}</option>)}</select></div>
                                         </div>
-                                        <div className="grid grid-cols-4 gap-2">
+                                        <div className="grid grid-cols-4 gap-2 font-black">
                                             {["子時", "丑時", "寅時", "卯時", "辰時", "巳時", "午時", "未時", "申時", "酉時", "戌時", "亥時"].map(s => (
-                                                <button key={s} onClick={() => setForm({...form, hour: s})} className={`py-2 rounded-xl text-[14px] font-black border transition-all ${form.hour === s ? 'bg-amber-600 text-black border-amber-400 scale-105' : 'bg-black/40 border-zinc-900 text-zinc-700'}`}>{s}</button>
+                                                <button key={s} onClick={() => setForm({...form, hour: s})} className={`py-2 rounded-xl border transition-all ${form.hour === s ? 'bg-amber-600 text-black border-amber-400 scale-105' : 'bg-black/40 border-zinc-900 text-zinc-700'}`}>{s}</button>
                                             ))}
                                         </div>
                                     </div>
 
-                                    <button onClick={handleAction} disabled={!form.name || isSpinning} className={`w-full mt-10 py-5 rounded-2xl font-black tracking-[0.3em] text-base transition-all shadow-2xl ${(!form.name || isSpinning) ? 'bg-zinc-900 text-zinc-800' : 'bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 text-black active:scale-95'}`}>
+                                    <button onClick={handleAction} disabled={!form.name || isSpinning} className={`w-full mt-10 py-5 rounded-2xl font-black tracking-[0.3em] transition-all shadow-2xl font-sans ${(!form.name || isSpinning) ? 'bg-zinc-900 text-zinc-800' : 'bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 text-black active:scale-95'}`}>
                                         {isSpinning ? "申 奏 中..." : "定 格 分 發"}
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        {currentTab === 'result' && result && (
+                        {tab === 'result' && result && (
                             <div className="animate-in zoom-in-95 duration-700 pb-20">
                                 <div className="ordination-paper rounded-2xl p-0.5 gold-border shadow-2xl">
                                     <div className="bg-[#050505] p-6 relative rounded-2xl border border-amber-900/10">
-                                        <div className="text-center mb-10 border-b border-amber-900/20 pb-8">
-                                            <div className="inline-block px-10 py-1.5 border border-amber-600/30 mb-8"><span className="text-amber-500 font-black tracking-[1.5em] text-[10px] uppercase italic">萬法宗壇</span></div>
-                                            <h2 className="text-2xl font-black text-amber-100 tracking-[0.3em] drop-shadow-2xl font-serif italic">職官分發告牒</h2>
+                                        <div className="text-center mb-10 border-b border-amber-900/20 pb-8 font-serif">
+                                            <div className="inline-block px-10 py-1.5 border border-amber-600/30 mb-8 font-sans"><span className="text-amber-500 font-black tracking-[1.5em] uppercase italic">萬法宗壇</span></div>
+                                            <h2 className="font-black text-amber-100 tracking-[0.3em] drop-shadow-2xl font-serif italic">職官分發告牒</h2>
                                         </div>
 
-                                        <div className="space-y-12 font-serif text-sm leading-relaxed text-zinc-300 px-2">
+                                        <div className="space-y-12 font-serif leading-relaxed text-zinc-300 px-2 font-black">
                                             <div className="space-y-8">
                                                 <p className="flex flex-col space-y-2">
-                                                    <span className="text-amber-600 font-black text-xs tracking-widest opacity-60 italic uppercase">一 奏 受</span>
-                                                    <span className="text-xl font-black text-white pl-4 border-l-2 border-amber-900/40 py-1 leading-loose tracking-widest">
-                                                        太上三五都功經籙紫府掌{result.fullRole}
+                                                    <span className="text-amber-600 font-black tracking-widest opacity-60 italic uppercase">一 奏 受</span>
+                                                    <span className="text-white pl-4 border-l-2 border-amber-900/40 py-1 leading-loose tracking-widest">
+                                                        太上三五都功經籙{result.fullRole}
                                                     </span>
                                                 </p>
 
                                                 <p className="flex flex-col space-y-2">
-                                                    <span className="text-amber-600 font-black text-xs tracking-widest opacity-60 italic">一 補 充</span>
-                                                    <span className="text-lg font-bold text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1">
-                                                        知天曹紀錄司黃{result.dt}為任
+                                                    <span className="text-amber-600 font-black tracking-widest opacity-60 italic">一 補 充</span>
+                                                    <span className="text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1">
+                                                        {result.office}兼{result.dt}為任
                                                     </span>
                                                 </p>
 
                                                 <p className="flex flex-col space-y-2">
-                                                    <span className="text-amber-600 font-black text-xs tracking-widest opacity-60 italic">一 奏 立</span>
-                                                    <span className="text-lg font-bold text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1">
-                                                        {result.al}壇{result.jn}
+                                                    <span className="text-amber-600 font-black tracking-widest opacity-60 italic">一 奏 立</span>
+                                                    <span className="text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1">
+                                                        {result.al}壇{result.jn}靖
                                                     </span>
                                                 </p>
 
                                                 <p className="flex flex-col space-y-2">
-                                                    <span className="text-amber-600 font-black text-xs tracking-widest opacity-60 italic">一 泰玄都省正一平炁宮</span>
-                                                    <span className="text-lg font-bold text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1">
+                                                    <span className="text-amber-600 font-black tracking-widest opacity-60 italic">一 泰玄都省正一平炁宮</span>
+                                                    <span className="text-zinc-200 pl-4 border-l-2 border-amber-900/40 py-1 font-black">
                                                         係 天師{result.zh}治{result.dl}都領炁
                                                     </span>
                                                 </p>
                                                 
                                                 <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-zinc-900 shadow-inner">
-                                                    <div className="text-[9px] text-zinc-700 uppercase tracking-widest mb-4 font-sans italic opacity-40">元命炁數 / 星君守護</div>
-                                                    <p className="text-amber-500 font-black text-lg leading-loose tracking-widest">
-                                                        {result.hl.qi}炁君{result.hl.planet}三五步罡元命應暢玄先生<br/>
-                                                        南嶽{result.hl.emperor}{result.hl.qi}炁真人<br/>
+                                                    <div className="text-zinc-700 uppercase tracking-widest mb-4 font-sans italic opacity-40">元命炁數 / 星君守護</div>
+                                                    {/* 此處 暢玄 與 南嶽 完全動態化 */}
+                                                    <p className="text-amber-500 font-black leading-loose tracking-widest">
+                                                        {result.hl.qi}炁君{result.hl.planet}三五步罡元命應{result.hl.master}先生<br/>
+                                                        {result.hl.mountain}{result.hl.emperor}{result.hl.qi}炁真人<br/>
                                                         配屬本命北斗{result.st}星君
                                                     </p>
                                                 </div>
 
                                                 <p className="flex flex-col space-y-4 pt-10 border-t border-zinc-900/50">
-                                                    <span className="text-amber-600 font-black text-xs tracking-widest uppercase opacity-60 italic">一 奏 撥</span>
-                                                    <span className="text-2xl font-black text-amber-100 pl-4 py-2 drop-shadow-xl tracking-widest leading-normal">
+                                                    <span className="text-amber-600 font-black tracking-widest uppercase opacity-60 italic">一 奏 撥</span>
+                                                    <span className="text-amber-100 pl-4 py-2 drop-shadow-xl tracking-widest leading-normal">
                                                         {result.prefix}{result.marshal}麾下
                                                     </span>
                                                 </p>
                                             </div>
 
-                                            <div className="text-center text-amber-900/40 font-sans text-[10px] mt-16 pt-10 border-t border-zinc-900/50 tracking-[0.4em] italic">
+                                            <div className="text-center text-amber-900/40 font-sans mt-16 pt-10 border-t border-zinc-900/50 tracking-[0.4em] italic font-black">
                                                 核於 {result.timeStr} • 萬神咸聽
                                             </div>
                                         </div>
 
-                                        <div className="mt-16 flex flex-col space-y-4 no-print font-sans">
-                                            <button onClick={() => window.print()} className="w-full bg-gradient-to-b from-amber-500 to-amber-700 text-black py-4 rounded-xl font-black text-sm active:scale-95 shadow-2xl">列 印 牒 文</button>
-                                            <button onClick={() => setCurrentTab('home')} className="w-full bg-zinc-900/50 text-zinc-600 py-3.5 rounded-xl font-black text-[10px] active:scale-95 tracking-widest italic border border-zinc-900">返回登錄</button>
+                                        <div className="mt-16 flex flex-col space-y-4 no-print font-sans font-black">
+                                            <button onClick={() => window.print()} className="w-full bg-gradient-to-b from-amber-500 to-amber-700 text-black py-4 rounded-xl active:scale-95 shadow-2xl">列 印 牒 文</button>
+                                            <button onClick={() => setTab('home')} className="w-full bg-zinc-900/50 text-zinc-600 py-3.5 rounded-xl active:scale-95 tracking-widest italic border border-zinc-900">返回登錄</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {currentTab === 'catalog' && (
+                        {tab === 'catalog' && (
                             <div className="animate-in slide-in-from-right duration-500 pb-40 space-y-6">
-                                <h2 className="text-xl font-black italic border-l-4 border-amber-600 pl-4 tracking-widest text-amber-100">法統全錄映射</h2>
+                                <h2 className="font-black italic border-l-4 border-amber-600 pl-4 tracking-widest text-amber-100 font-serif">法統全錄映射</h2>
                                 <div className="relative font-sans">
-                                    <input className="w-full bg-black border border-zinc-900 rounded-xl py-3 px-4 font-bold text-amber-50 shadow-2xl outline-none focus:border-amber-600 text-sm" placeholder="搜尋年份/甲子..." value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} />
+                                    <input className="w-full bg-black border border-zinc-900 rounded-xl py-3 px-4 font-bold text-amber-50 shadow-2xl outline-none focus:border-amber-600" placeholder="搜尋年份/甲子..." value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} />
                                 </div>
-                                <div className="bg-[#0a0a0a] rounded-2xl border border-zinc-900 p-4 shadow-2xl">
-                                    <div className="grid grid-cols-2 gap-3 h-[70vh] overflow-y-auto custom-scrollbar px-1">
+                                <div className="bg-[#0a0a0a] rounded-2xl border border-zinc-900 p-4 shadow-2xl font-black">
+                                    <div className="grid grid-cols-2 gap-3 h-[70vh] overflow-y-auto custom-scrollbar px-1 font-sans">
                                         {JIAZI_60.map((name, index) => {
                                             if (catalogQuery && !name.includes(catalogQuery)) return null;
                                             const m = MARSHAL_CANON[getMarshalIdx(index)];
                                             const isGroup = index % 4 === 0;
                                             return (
-                                                <div key={name} className={`bg-zinc-950/40 p-4 rounded-3xl border border-zinc-900/60 flex flex-col items-center justify-center space-y-2 group active:bg-amber-950/20 transition-all ${isGroup ? 'border-l-2 border-l-amber-600/40' : ''}`}>
+                                                <div key={name} className={`bg-zinc-950/40 p-5 rounded-3xl border border-zinc-900/60 flex flex-col items-center justify-center space-y-2 group active:bg-amber-950/20 transition-all ${isGroup ? 'border-l-2 border-l-amber-600/40' : ''}`}>
                                                     <div className="flex justify-between w-full px-2 items-center">
-                                                        <span className="text-[10px] font-black text-zinc-800 italic">#{m.rank}</span>
-                                                        <span className="font-black text-base text-zinc-400 group-hover:text-amber-100">{name}</span>
+                                                        <span className="text-zinc-800 italic">#{m.rank}</span>
+                                                        <span className="text-zinc-400 group-hover:text-amber-100">{name}</span>
                                                     </div>
                                                     <div className="text-center font-serif pt-2 border-t border-zinc-900/50 w-full">
-                                                        <span className="block font-black text-amber-600 italic text-sm tracking-tighter uppercase">{m.name}</span>
+                                                        <span className="block font-black text-amber-600 italic tracking-tighter uppercase">{m.name}</span>
                                                     </div>
                                                 </div>
                                             );
@@ -293,15 +334,15 @@
                     </main>
 
                     {/* Footer Nav */}
-                    <nav className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-3xl border-t border-amber-900/20 p-4 pb-8 z-50 max-w-md mx-auto rounded-t-[2.5rem] shadow-2xl no-print font-sans">
+                    <nav className="fixed bottom-0 left-0 right-0 bg-black backdrop-blur-3xl border-t border-amber-900/20 p-4 pb-8 z-50 max-w-md mx-auto rounded-t-[2.5rem] shadow-2xl no-print font-sans font-black">
                         <div className="flex justify-around items-center">
-                            <button onClick={() => setCurrentTab('home')} className={`flex flex-col items-center space-y-1 px-10 transition-all relative ${currentTab === 'home' || currentTab === 'result' ? 'text-amber-400 scale-110' : 'text-zinc-700'}`}>
-                                <span className="text-[11px] font-black uppercase tracking-[0.2em]">錄籍登記</span>
-                                {(currentTab === 'home' || currentTab === 'result') && <div className="absolute -top-3 w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]" />}
+                            <button onClick={() => setTab('home')} className={`flex flex-col items-center space-y-1 px-10 transition-all relative ${tab === 'home' || tab === 'result' ? 'text-amber-400 scale-110' : 'text-zinc-700'}`}>
+                                <span className="uppercase tracking-[0.2em]">錄籍登記</span>
+                                {(tab === 'home' || tab === 'result') && <div className="absolute -top-3 w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]" />}
                             </button>
-                            <button onClick={() => setCurrentTab('catalog')} className={`flex flex-col items-center space-y-1 px-10 transition-all relative ${currentTab === 'catalog' ? 'text-amber-400 scale-110' : 'text-zinc-700'}`}>
-                                <span className="text-[11px] font-black uppercase tracking-[0.2em]">映射全錄</span>
-                                {(currentTab === 'catalog') && <div className="absolute -top-3 w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]" />}
+                            <button onClick={() => setTab('catalog')} className={`flex flex-col items-center space-y-1 px-10 transition-all relative ${tab === 'catalog' ? 'text-amber-400 scale-110' : 'text-zinc-700'}`}>
+                                <span className="uppercase tracking-[0.2em]">映射全錄</span>
+                                {(tab === 'catalog') && <div className="absolute -top-3 w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]" />}
                             </button>
                         </div>
                     </nav>
