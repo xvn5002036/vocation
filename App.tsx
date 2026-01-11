@@ -1,8 +1,8 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { HeavenlyStem, EarthlyBranch, PersonnelRecord } from './types';
-import { BRANCHES, CELESTIAL_GENERALS } from './constants';
-import { calculateOrdination, getYearStemBranch } from './utils';
+import { HeavenlyStem, EarthlyBranch, PersonnelRecord } from './types.ts';
+import { BRANCHES, CELESTIAL_GENERALS } from './constants.tsx';
+import { calculateOrdination, getYearStemBranch } from './utils.ts';
 
 const App: React.FC = () => {
   const [lunarYear, setLunarYear] = useState<number>(76);

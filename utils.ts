@@ -1,5 +1,5 @@
 
-import { HeavenlyStem, EarthlyBranch, OrdinationResult } from './types';
+import { HeavenlyStem, EarthlyBranch, OrdinationResult } from './types.ts';
 import { 
   getTitleByMonth, 
   getJingTanZhi,
@@ -9,7 +9,7 @@ import {
   TREASURY_MAP,
   FIVE_ELEMENTS_MAP,
   getClericalOffice
-} from './constants';
+} from './constants.tsx';
 
 export const calculateOrdination = (
   yearStem: HeavenlyStem,
