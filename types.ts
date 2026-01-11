@@ -14,6 +14,8 @@ export interface OrdinationResult {
   soldiers: string;
   treasury: string;
   official: string;
+  quanName: string;      // 時辰對應的職權名稱
+  quanDesc: string;      // 時辰對應的職能特性
 }
 
 export interface PersonnelRecord extends OrdinationResult {

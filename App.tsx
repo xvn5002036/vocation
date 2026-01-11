@@ -54,7 +54,11 @@ const App: React.FC = () => {
   };
 
   const getPureOffice = () => {
-    return result?.office.split('\n')[1]?.replace('一執「', '').replace('」、掌「', '').replace('」', '') || "";
+    if (!result) return "";
+    const lines = result.office.split('\n');
+    const fuGong = lines[1]?.replace('一執「', '').replace('」、掌「', '').replace('」', '') || "";
+    const si = lines[2]?.split('及')[0]?.replace('一兼領「', '').replace('」', '').trim() || "";
+    return `${fuGong}，兼領${si}及「${result.quanName}」`;
   };
 
   const getReportingText = () => {
@@ -167,6 +171,10 @@ const App: React.FC = () => {
                       <div className="bg-[#fcf8ed] p-6 md:p-10 border-l-[8px] md:border-l-[15px] border-red-900 rounded-r-2xl shadow-inner relative overflow-hidden">
                         <div className="absolute -top-10 -right-10 text-[8rem] md:text-[12rem] text-red-900/5 font-calligraphy rotate-12 pointer-events-none">籙</div>
                         <p className="text-xl md:text-3xl font-bold text-red-950 leading-[1.8] md:leading-[2.2] whitespace-pre-line font-serif">{result.office}</p>
+                        <div className="mt-4 p-4 bg-white/60 rounded-xl border border-red-900/10">
+                           <p className="text-red-950 font-bold text-xs md:text-sm mb-1">職能特性：</p>
+                           <p className="text-stone-600 text-xs md:text-sm italic">{result.quanDesc}</p>
+                        </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4 md:gap-8 py-8 border-y border-stone-200">
                         <div className="text-center border-r border-stone-100 px-2">
@@ -200,7 +208,7 @@ const App: React.FC = () => {
                               <span className="text-xs opacity-60 font-serif">撥發兵馬</span>
                               <span className="text-2xl md:text-4xl font-bold font-calligraphy">{result.soldiers}</span>
                             </div>
-                            <p className="text-stone-400 text-[10px] md:text-xs font-bold tracking-[0.6em] opacity-60 uppercase">依照《天壇玉格》第九頁之法</p>
+                            <p className="text-stone-400 text-[10px] md:text-xs font-bold tracking-[0.6em] opacity-60 uppercase">依照《天壇玉格》與時辰法格撥發</p>
                           </div>
                         </div>
                       </div>
@@ -240,7 +248,7 @@ const App: React.FC = () => {
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl md:text-3xl">⚡</span>
-                        <h4 className="text-xl md:text-2xl font-serif font-bold text-red-900">行法申報範式 (丁卯基準校對)</h4>
+                        <h4 className="text-xl md:text-2xl font-serif font-bold text-red-900">行法申報範式 (時辰職權校對)</h4>
                       </div>
                       <div className="flex p-1 bg-stone-100 rounded-xl w-fit">
                         <button onClick={() => setRitualType('general')} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${ritualType === 'general' ? 'bg-white text-red-900 shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}>一般科儀 (祈福)</button>

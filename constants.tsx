@@ -18,22 +18,31 @@ export const CELESTIAL_GENERALS = [
 ];
 
 /**
+ * 根據最新圖片：出生時辰對應職權名稱及職能特性 (權限說明)
+ */
+export const HOUR_AUTHORITY_MAP: Record<EarthlyBranch, { name: string, desc: string }> = {
+  '子': { name: '三界糾察事', desc: '主司監察、檢舉、考核神凡善惡，權力威嚴。' },
+  '丑': { name: '三界勘合事', desc: '主司文書核對、勘驗關防、確保法旨無誤。' },
+  '寅': { name: '三界行移事', desc: '主司公文傳遞、各部溝通、負責「跑公文」。' },
+  '卯': { name: '三界點檢事', desc: '主司清點兵馬、點校錢糧、檢查壇場編制。' },
+  '辰': { name: '三界推問事', desc: '主司審訊、考鬼、審問邪祟因由。' },
+  '巳': { name: '三界通傳事', desc: '主司奏傳、通報信息，與寅時類似但更偏向傳達。' },
+  '午': { name: '三界執法事', desc: '主司行刑、執行法旨、現場督戰，剛勇無比。' },
+  '未': { name: '三界理問事', desc: '主司理清冤結、調解因果、處理冥界訴訟。' },
+  '申': { name: '三界便宜事', desc: '您的職權：准予先斬後奏、臨機應變、先行處置。' },
+  '酉': { name: '三界收管事', desc: '主司收攝魂魄、拘禁妖邪、管理天牢。' },
+  '戌': { name: '三界點視事', desc: '主司夜巡、巡視界內安寧、察看隱藏邪祟。' },
+  '亥': { name: '三界密察事', desc: '主司隱密偵察、暗中監視、防止邪魔遁逃。' }
+};
+
+/**
  * 根據照片第八頁末尾：論心恩主副二將 (依本命地支論之)
  * 訣曰：子辛 丑鄧 寅趙 卯張 辰魯 巳馬 午王 未殷 申溫 酉康 戌關 亥方
  */
 export const HEART_MARSHAL_MAP: Record<EarthlyBranch, string> = {
-  '子': '辛元帥',
-  '丑': '鄧元帥',
-  '寅': '趙元帥',
-  '卯': '張元帥',
-  '辰': '魯元帥',
-  '巳': '馬元帥',
-  '午': '王元帥',
-  '未': '殷元帥',
-  '申': '溫元帥',
-  '酉': '康元帥',
-  '戌': '關元帥',
-  '亥': '方元帥'
+  '子': '辛元帥', '丑': '鄧元帥', '寅': '趙元帥', '卯': '張元帥',
+  '辰': '魯元帥', '巳': '馬元帥', '午': '王元帥', '未': '殷元帥',
+  '申': '溫元帥', '酉': '康元帥', '戌': '關元帥', '亥': '方元帥'
 };
 
 export const getTitleByMonth = (month: number, day: number, gender: '男' | '女'): string => {
@@ -50,25 +59,29 @@ export const getTitleByMonth = (month: number, day: number, gender: '男' | '女
   return gender === '男' ? `${baseTitle}先生` : `${baseTitle}元君`;
 };
 
-export const BRANCH_DATA_MAP: Record<EarthlyBranch, { fu: string, gong: string, si: string, quan: string }> = {
-  '子': { fu: '泰玄府', gong: '招真仙宮', si: '知天曹紀錄司', quan: '兼三界便宜事' },
-  '丑': { fu: '都天府', gong: '宜男仙宮', si: '知天曹考察司', quan: '兼三界便宜事' },
-  '寅': { fu: '執法府', gong: '祈嗣仙宮', si: '知天曹功曹司', quan: '兼三界便宜事' },
-  '卯': { fu: '勾陳府', gong: '集善仙宮', si: '知天曹主案司', quan: '兼三界便宜事' },
-  '辰': { fu: '鳳閣府', gong: '集善仙宮', si: '知天曹賞善司', quan: '兼三界便宜事' },
-  '巳': { fu: '彤華府', gong: '延慶仙宮', si: '知天曹罰惡司', quan: '兼三界便宜事' },
-  '午': { fu: '威德府', gong: '長樂仙宮', si: '知天曹執法司', quan: '兼三界便宜事' },
-  '未': { fu: '宣威府', gong: '慈愛仙宮', si: '知天曹監督司', quan: '兼三界便宜事' },
-  '申': { fu: '揚威府', gong: '移仗仙宮', si: '知天曹司籍司', quan: '兼三界便宜事' },
-  '酉': { fu: '耀武府', gong: '招賢仙宮', si: '知天曹考校司', quan: '兼三界便宜事' },
-  '戌': { fu: '振武府', gong: '廣德仙宮', si: '知天曹檢核司', quan: '兼三界便宜事' },
-  '亥': { fu: '廣德府', gong: '招順仙宮', si: '知天曹注籍司', quan: '兼三界便宜事' }
+/**
+ * 府、宮、司 依據年命地支
+ */
+export const BRANCH_DATA_MAP: Record<EarthlyBranch, { fu: string, gong: string, si: string }> = {
+  '子': { fu: '泰玄府', gong: '招真仙宮', si: '知天曹紀錄司' },
+  '丑': { fu: '都天府', gong: '宜男仙宮', si: '知天曹考察司' },
+  '寅': { fu: '執法府', gong: '祈嗣仙宮', si: '知天曹功曹司' },
+  '卯': { fu: '勾陳府', gong: '集善仙宮', si: '知天曹主案司' },
+  '辰': { fu: '鳳閣府', gong: '集善仙宮', si: '知天曹賞善司' },
+  '巳': { fu: '彤華府', gong: '延慶仙宮', si: '知天曹罰惡司' },
+  '午': { fu: '威德府', gong: '長樂仙宮', si: '知天曹執法司' },
+  '未': { fu: '宣威府', gong: '慈愛仙宮', si: '知天曹監督司' },
+  '申': { fu: '揚威府', gong: '移仗仙宮', si: '知天曹司籍司' },
+  '酉': { fu: '耀武府', gong: '招賢仙宮', si: '知天曹考校司' },
+  '戌': { fu: '振武府', gong: '廣德仙宮', si: '知天曹檢核司' },
+  '亥': { fu: '廣德府', gong: '招順仙宮', si: '知天曹注籍司' }
 };
 
-export const getClericalOffice = (yearBranch: EarthlyBranch): string => {
-  const data = BRANCH_DATA_MAP[yearBranch];
-  if (!data) return "一奏受太上三五都功經籙";
-  return `一奏受太上三五都功經籙\n一執「${data.fu}」、掌「${data.gong}」\n一兼領「${data.si}」及「${data.quan}」`;
+export const getClericalOffice = (yearBranch: EarthlyBranch, hourBranch: EarthlyBranch): string => {
+  const yearData = BRANCH_DATA_MAP[yearBranch];
+  const hourData = HOUR_AUTHORITY_MAP[hourBranch];
+  if (!yearData) return "一奏受太上三五都功經籙";
+  return `一奏受太上三五都功經籙\n一執「${yearData.fu}」、掌「${yearData.gong}」\n一兼領「${yearData.si}」及「${hourData.name}」`;
 };
 
 export const getJingTanZhi = (stem: HeavenlyStem, branch: EarthlyBranch) => {
