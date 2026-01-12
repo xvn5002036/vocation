@@ -1,18 +1,19 @@
 
 import { HeavenlyStem, EarthlyBranch, OrdinationResult, OrdinationLevel, Vocation } from './types.ts';
 import { 
-  getTitleByMonth, 
+  getBaseTitleByMonth, 
+  getBaseTitleByMonth as getMonthTitle,
   getJingTanZhi,
   SOLDIERS_MAP,
-  MARSHAL_MAP,
-  TIAN_MARSHAL,
   HEART_MARSHAL_MAP,
   TREASURY_MAP,
   FIVE_ELEMENTS_MAP,
   getClericalOfficeDescription,
   HOUR_AUTHORITY_MAP,
   LEVEL_DATA_MAP,
-  getDepartment
+  HOUR_VOCATION_DATA,
+  STEM_MARSHAL_CONFIG,
+  MARSHAL_BAOGAO_MAP
 } from './constants.tsx';
 
 export const calculateOrdination = (
@@ -26,30 +27,17 @@ export const calculateOrdination = (
   vocation: Vocation = '一般科儀'
 ): OrdinationResult => {
   const mapping = getJingTanZhi(yearStem, yearBranch);
-  const title = getTitleByMonth(month, day, gender);
+  const baseTitle = getBaseTitleByMonth(month, day);
   const office = getClericalOfficeDescription(yearBranch, hourBranch, level); 
-  const stemMarshal = MARSHAL_MAP[yearStem];
   const heartMarshal = HEART_MARSHAL_MAP[yearBranch];
   const soldiers = SOLDIERS_MAP[yearBranch];
   const treasuryData = TREASURY_MAP[yearStem];
   const hourAuth = HOUR_AUTHORITY_MAP[hourBranch];
   const levelData = LEVEL_DATA_MAP[level];
-  const department = getDepartment(level, yearBranch);
 
-  /**
-   * 2025 實務主帥判定邏輯：
-   * 1. 若職隸「九天風火院」：田元帥為首。馬元帥（或年命主帥）退居輔助（副帥）。
-   * 2. 若職隸「雷霆都司」：年命主帥（如馬、溫、趙、殷）為首。田元帥為輔助（副帥）。
-   * 3. 若職能為「驅邪考召」：田元帥必須列為「行事主帥」首位。
-   */
-  let primaryMarshal = stemMarshal;
-  let secondaryMarshal = TIAN_MARSHAL;
+  const hVocData = HOUR_VOCATION_DATA[hourBranch];
+  const genderTitle = gender === '男' ? hVocData.maleTitle : hVocData.femaleTitle;
 
-  if (vocation === '驅邪考召' || department === '九天風火院') {
-    primaryMarshal = TIAN_MARSHAL;
-    secondaryMarshal = stemMarshal;
-  }
-  
   let stemPair = '';
   if (['甲', '乙'].includes(yearStem)) stemPair = '甲乙';
   else if (['丙', '丁'].includes(yearStem)) stemPair = '丙丁';
@@ -57,14 +45,24 @@ export const calculateOrdination = (
   else if (['庚', '辛'].includes(yearStem)) stemPair = '庚辛';
   else if (['壬', '癸'].includes(yearStem)) stemPair = '壬癸';
   
+  const marshalConfig = STEM_MARSHAL_CONFIG[stemPair];
+  const primaryMarshal = marshalConfig.primary;
+  const secondaryMarshal = marshalConfig.secondary;
+
+  // 抓取對應寶誥
+  const primaryBaoGao = MARSHAL_BAOGAO_MAP[primaryMarshal] || "志心皈命禮。神威顯赫，護法延生。大悲大願，大聖大慈。";
+  const secondaryBaoGao = MARSHAL_BAOGAO_MAP[secondaryMarshal] || "志心皈命禮。神威顯赫，護法延生。大悲大願，大聖大慈。";
+  
   const elementData = FIVE_ELEMENTS_MAP[stemPair] || { organ: '五臟', deity: '三炁真人' };
 
   return {
     level: level,
-    department: department,
+    department: '雷霆都司', 
     vocation: vocation,
     mainJingLu: levelData.jingLu,
-    title: title,
+    title: baseTitle,
+    hourVocation: hVocData.vocation,
+    genderTitle: genderTitle,
     office: office,
     tan: mapping.tan,
     jing: mapping.jing,
@@ -72,6 +70,8 @@ export const calculateOrdination = (
     deity: elementData.deity,
     primaryMarshal: primaryMarshal,
     secondaryMarshal: secondaryMarshal,
+    primaryBaoGao: primaryBaoGao,
+    secondaryBaoGao: secondaryBaoGao,
     heartMarshal: heartMarshal,
     soldiers: soldiers,
     treasury: treasuryData.treasury,
