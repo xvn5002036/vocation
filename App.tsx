@@ -78,12 +78,13 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col items-center bg-[#fdfaf2] pb-12 text-stone-900">
       <nav className="w-full bg-[#7a0000] text-white py-4 px-6 md:px-12 flex justify-between items-center shadow-xl z-20 sticky top-0">
         <div className="flex flex-col">
-          <h1 className="text-xl md:text-2xl font-calligraphy tracking-widest text-[#fdfaf2]">龍虎山正一授籙系統</h1>
-          <span className="text-[10px] opacity-70 tracking-tighter uppercase font-sans">LONGHU MANSION MANAGEMENT</span>
+          <span className="text-sm md:text-base font-bold tracking-widest text-[#fdfaf2] opacity-90">龍虎山正一</span>
+          <h1 className="text-base md:text-xl font-calligraphy tracking-widest text-[#fdfaf2] -mt-1">授籙管理系統</h1>
+          <span className="text-[8px] opacity-50 tracking-tighter uppercase font-sans">LONGHU MANSION MANAGEMENT</span>
         </div>
         <div className="flex space-x-2">
-          <button onClick={() => setView('generate')} className={`px-4 py-2 rounded-lg font-bold transition-all text-xs md:text-sm ${view === 'generate' ? 'bg-[#fdfaf2] text-[#7a0000] shadow-md' : 'hover:bg-red-800'}`}>錄籍查詢</button>
-          <button onClick={() => setView('list')} className={`px-4 py-2 rounded-lg font-bold transition-all text-xs md:text-sm ${view === 'list' ? 'bg-[#fdfaf2] text-[#7a0000] shadow-md' : 'hover:bg-red-800'}`}>清冊管理 ({personnel.length})</button>
+          <button onClick={() => setView('generate')} className={`px-3 py-2 rounded-lg font-bold transition-all text-[10px] md:text-xs ${view === 'generate' ? 'bg-[#fdfaf2] text-[#7a0000] shadow-md' : 'hover:bg-red-800'}`}>錄籍查詢</button>
+          <button onClick={() => setView('list')} className={`px-3 py-2 rounded-lg font-bold transition-all text-[10px] md:text-xs ${view === 'list' ? 'bg-[#fdfaf2] text-[#7a0000] shadow-md' : 'hover:bg-red-800'}`}>清冊管理 ({personnel.length})</button>
         </div>
       </nav>
 
@@ -152,7 +153,6 @@ const App: React.FC = () => {
                   <div className="absolute top-4 left-4 border border-red-900/10 w-[calc(100%-32px)] h-[calc(100%-32px)] pointer-events-none"></div>
                   <div className="relative z-10 font-serif">
                     <div className="text-center mb-10 md:mb-16">
-                      <p className="text-[#7a0000] font-bold text-base md:text-xl tracking-[0.5em] opacity-40 mb-6 md:mb-10">太 上 正 一 盟 威 經 籙</p>
                       <h3 className="text-5xl md:text-8xl font-calligraphy text-[#4a0000]">授 籙 職 牒</h3>
                     </div>
                     <div className="space-y-8 md:space-y-12 text-stone-900">
