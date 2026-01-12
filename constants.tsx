@@ -6,9 +6,6 @@ export const BRANCHES: EarthlyBranch[] = ['子', '丑', '寅', '卯', '辰', '�
 
 /**
  * 2025 彙編與天壇玉格：院司分配嚴謹邏輯
- * 1. 晉授 (五雷) -> 必歸【雷霆都司】
- * 2. 初授 (都功) -> 必歸【九天風火院】
- * 3. 加授 (盟威) -> 陽命(子寅辰午申戌)歸【雷霆都司】，陰命(丑卯巳未酉亥)歸【九天風火院】
  */
 export const getDepartment = (level: OrdinationLevel, branch: EarthlyBranch): Department => {
   if (level === '晉授') return '雷霆都司';
@@ -25,8 +22,26 @@ export const LEVEL_DATA_MAP: Record<OrdinationLevel, { jingLu: string, juWei: st
 };
 
 /**
- * 張天師三十六員天將 (2025 彙編核校版)
+ * 2025 校核：九天風火院主將田元帥全銜
  */
+export const TIAN_MARSHAL = "九天風火院主管田元帥";
+
+/**
+ * 2025 彙編：主將全銜 (本命主將)
+ */
+export const MARSHAL_MAP: Record<string, string> = {
+  '甲': '地祇主令都巡太保溫元帥', 
+  '乙': '地祇主令都巡太保溫元帥',
+  '丙': '斗口靈官解厄馬元帥', 
+  '丁': '斗口靈官解厄馬元帥',
+  '戊': '地司太歲武光上將殷元帥', 
+  '己': '地司太歲武光上將殷元帥',
+  '庚': '上清正一龍虎執法趙元帥', 
+  '辛': '上清正一龍虎執法趙元帥',
+  '壬': '風輪蕩魔收怪滅邪周元帥', 
+  '癸': '風輪蕩魔收怪滅邪周元帥'
+};
+
 export const CELESTIAL_GENERALS = [
   '張節', '趙公明', '辛漢臣', '荀劉吉', '畢京遠',
   '吳明遠', '殷郊', '王善', '關羽', '鄧伯溫',
@@ -39,16 +54,16 @@ export const CELESTIAL_GENERALS = [
 
 export const HOUR_AUTHORITY_MAP: Record<EarthlyBranch, { name: string, desc: string }> = {
   '子': { name: '三界糾察事', desc: '主司監察、檢舉、考核神凡善惡。' },
-  '丑': { name: '三界勘合事', desc: '主司文書核對、勘驗關防、確保法旨無誤。' },
+  '丑': { name: '三界勘合事', desc: '主司文書核對、勘驗關防。' },
   '寅': { name: '三界行移事', desc: '主司公文傳遞、各部溝通。' },
-  '卯': { name: '三界點檢事', desc: '主司清點兵馬、點校錢糧、檢查壇場編制。' },
-  '辰': { name: '三界推問事', desc: '主司審訊、考鬼、審問邪祟因由。' },
+  '卯': { name: '三界點檢事', desc: '主司清點兵馬、點校錢糧。' },
+  '辰': { name: '三界推問事', desc: '主司審訊、考鬼、審問邪祟。' },
   '巳': { name: '三界通傳事', desc: '主司奏傳、通報信息。' },
-  '午': { name: '三界執法事', desc: '主司行刑、執行法旨、現場督戰。' },
-  '未': { name: '三界理問事', desc: '主司理清冤結、調解因果、處理冥界訴訟。' },
-  '申': { name: '三界便宜事', desc: '准予先斬後奏、臨機應變、先行處置。' },
-  '酉': { name: '三界收管事', desc: '主司收攝魂魄、拘禁妖邪、管理天牢。' },
-  '戌': { name: '三界點視事', desc: '主司夜巡、巡視界內安寧、察看隱藏邪祟。' },
+  '午': { name: '三界執法事', desc: '主司行刑、執行法旨。' },
+  '未': { name: '三界理問事', desc: '主司理清冤結、調解因果。' },
+  '申': { name: '三界便宜事', desc: '准予先斬後奏、臨機應變。' },
+  '酉': { name: '三界收管事', desc: '主司收攝魂魄、拘禁妖邪。' },
+  '戌': { name: '三界點視事', desc: '主司夜巡、巡視界內安寧。' },
   '亥': { name: '三界密察事', desc: '主司隱密偵察、暗中監視。' }
 };
 
@@ -116,30 +131,10 @@ export const getJingTanZhi = (stem: HeavenlyStem, branch: EarthlyBranch) => {
   return map[key] || { tan: '玄靈應妙壇', jing: '通玄致真靖', zhi: '陽平治左平炁' };
 };
 
-/**
- * 依據《天壇玉格》配賦兵馬
- */
 export const SOLDIERS_MAP: Record<EarthlyBranch, string> = {
   '子': '一萬三千零五十名', '丑': '七萬一千名', '寅': '一萬一千名', '卯': '三百八十名',
   '辰': '一千四百七十名', '巳': '七百名', '午': '一千名', '未': '十萬名',
   '申': '一萬名', '酉': '三萬名', '戌': '八千名', '亥': '五百名'
-};
-
-/**
- * 2025 彙編：主將全銜 (精確核對版)
- * 嚴格匹配雷霆都司(溫、趙、周)與九天風火院(馬、殷)之主理權責
- */
-export const MARSHAL_MAP: Record<string, string> = {
-  '甲': '地祇主令都巡太保溫元帥', 
-  '乙': '地祇主令都巡太保溫元帥',
-  '丙': '正一解厄靈官文魁馬元帥', 
-  '丁': '正一解厄靈官文魁馬元帥',
-  '戊': '地司太歲武光上將殷元帥', 
-  '己': '地司太歲武光上將殷元帥',
-  '庚': '上清正一龍虎執法趙元帥', 
-  '辛': '上清正一龍虎執法趙元帥',
-  '壬': '風輪蕩魔收怪滅邪周元帥', 
-  '癸': '風輪蕩魔收怪滅邪周元帥'
 };
 
 export const TREASURY_MAP: Record<HeavenlyStem, { treasury: string, official: string }> = {

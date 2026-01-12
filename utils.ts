@@ -1,10 +1,11 @@
 
-import { HeavenlyStem, EarthlyBranch, OrdinationResult, OrdinationLevel } from './types.ts';
+import { HeavenlyStem, EarthlyBranch, OrdinationResult, OrdinationLevel, Vocation } from './types.ts';
 import { 
   getTitleByMonth, 
   getJingTanZhi,
   SOLDIERS_MAP,
   MARSHAL_MAP,
+  TIAN_MARSHAL,
   HEART_MARSHAL_MAP,
   TREASURY_MAP,
   FIVE_ELEMENTS_MAP,
@@ -21,18 +22,33 @@ export const calculateOrdination = (
   day: number,
   hourBranch: EarthlyBranch,
   gender: '男' | '女',
-  level: OrdinationLevel = '初授'
+  level: OrdinationLevel = '初授',
+  vocation: Vocation = '一般科儀'
 ): OrdinationResult => {
   const mapping = getJingTanZhi(yearStem, yearBranch);
   const title = getTitleByMonth(month, day, gender);
   const office = getClericalOfficeDescription(yearBranch, hourBranch, level); 
-  const marshal = MARSHAL_MAP[yearStem];
+  const stemMarshal = MARSHAL_MAP[yearStem];
   const heartMarshal = HEART_MARSHAL_MAP[yearBranch];
   const soldiers = SOLDIERS_MAP[yearBranch];
   const treasuryData = TREASURY_MAP[yearStem];
   const hourAuth = HOUR_AUTHORITY_MAP[hourBranch];
   const levelData = LEVEL_DATA_MAP[level];
   const department = getDepartment(level, yearBranch);
+
+  /**
+   * 2025 實務主帥判定邏輯：
+   * 1. 若職隸「九天風火院」：田元帥為首。馬元帥（或年命主帥）退居輔助（副帥）。
+   * 2. 若職隸「雷霆都司」：年命主帥（如馬、溫、趙、殷）為首。田元帥為輔助（副帥）。
+   * 3. 若職能為「驅邪考召」：田元帥必須列為「行事主帥」首位。
+   */
+  let primaryMarshal = stemMarshal;
+  let secondaryMarshal = TIAN_MARSHAL;
+
+  if (vocation === '驅邪考召' || department === '九天風火院') {
+    primaryMarshal = TIAN_MARSHAL;
+    secondaryMarshal = stemMarshal;
+  }
   
   let stemPair = '';
   if (['甲', '乙'].includes(yearStem)) stemPair = '甲乙';
@@ -46,6 +62,7 @@ export const calculateOrdination = (
   return {
     level: level,
     department: department,
+    vocation: vocation,
     mainJingLu: levelData.jingLu,
     title: title,
     office: office,
@@ -53,7 +70,8 @@ export const calculateOrdination = (
     jing: mapping.jing,
     governance: mapping.zhi + '係天師門下',
     deity: elementData.deity,
-    marshal: marshal,
+    primaryMarshal: primaryMarshal,
+    secondaryMarshal: secondaryMarshal,
     heartMarshal: heartMarshal,
     soldiers: soldiers,
     treasury: treasuryData.treasury,
