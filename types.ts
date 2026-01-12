@@ -1,21 +1,27 @@
 
 export type HeavenlyStem = '甲' | '乙' | '丙' | '丁' | '戊' | '己' | '庚' | '辛' | '壬' | '癸';
 export type EarthlyBranch = '子' | '丑' | '寅' | '卯' | '辰' | '巳' | '午' | '未' | '申' | '酉' | '戌' | '亥';
+export type OrdinationLevel = '初授' | '加授' | '晉授';
+export type Department = '雷霆都司' | '九天風火院';
 
 export interface OrdinationResult {
-  title: string;
-  office: string;
+  level: OrdinationLevel;
+  department: Department; // 所屬院司
+  mainJingLu: string;    
+  title: string;         
+  office: string;        
   tan: string;
   jing: string;
   governance: string;
   deity: string;
-  marshal: string;      // 本命主將 (天干)
-  heartMarshal: string; // 心恩主將 (地支)
+  marshal: string;      
+  heartMarshal: string; 
   soldiers: string;
   treasury: string;
   official: string;
-  quanName: string;      // 時辰對應的職權名稱
-  quanDesc: string;      // 時辰對應的職能特性
+  quanName: string;      
+  quanDesc: string;      
+  juWei: string;         
 }
 
 export interface PersonnelRecord extends OrdinationResult {

@@ -1,5 +1,5 @@
 
-import { HeavenlyStem, EarthlyBranch, OrdinationResult } from './types.ts';
+import { HeavenlyStem, EarthlyBranch, OrdinationResult, OrdinationLevel } from './types.ts';
 import { 
   getTitleByMonth, 
   getJingTanZhi,
@@ -8,8 +8,10 @@ import {
   HEART_MARSHAL_MAP,
   TREASURY_MAP,
   FIVE_ELEMENTS_MAP,
-  getClericalOffice,
-  HOUR_AUTHORITY_MAP
+  getClericalOfficeDescription,
+  HOUR_AUTHORITY_MAP,
+  LEVEL_DATA_MAP,
+  getDepartment
 } from './constants.tsx';
 
 export const calculateOrdination = (
@@ -18,16 +20,19 @@ export const calculateOrdination = (
   month: number,
   day: number,
   hourBranch: EarthlyBranch,
-  gender: '男' | '女'
+  gender: '男' | '女',
+  level: OrdinationLevel = '初授'
 ): OrdinationResult => {
   const mapping = getJingTanZhi(yearStem, yearBranch);
   const title = getTitleByMonth(month, day, gender);
-  const office = getClericalOffice(yearBranch, hourBranch); 
+  const office = getClericalOfficeDescription(yearBranch, hourBranch, level); 
   const marshal = MARSHAL_MAP[yearStem];
   const heartMarshal = HEART_MARSHAL_MAP[yearBranch];
   const soldiers = SOLDIERS_MAP[yearBranch];
   const treasuryData = TREASURY_MAP[yearStem];
   const hourAuth = HOUR_AUTHORITY_MAP[hourBranch];
+  const levelData = LEVEL_DATA_MAP[level];
+  const department = getDepartment(level, yearBranch);
   
   let stemPair = '';
   if (['甲', '乙'].includes(yearStem)) stemPair = '甲乙';
@@ -39,6 +44,9 @@ export const calculateOrdination = (
   const elementData = FIVE_ELEMENTS_MAP[stemPair] || { organ: '五臟', deity: '三炁真人' };
 
   return {
+    level: level,
+    department: department,
+    mainJingLu: levelData.jingLu,
     title: title,
     office: office,
     tan: mapping.tan,
@@ -51,7 +59,8 @@ export const calculateOrdination = (
     treasury: treasuryData.treasury,
     official: treasuryData.official,
     quanName: hourAuth.name,
-    quanDesc: hourAuth.desc
+    quanDesc: hourAuth.desc,
+    juWei: levelData.juWei
   };
 };
 
