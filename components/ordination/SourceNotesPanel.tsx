@@ -1,12 +1,3 @@
 import React from 'react';
-
-const SourceNotesPanel: React.FC = () => (
-  <section className="source-notes no-print">
-    <header><span className="report-mark">格</span><div><small>原典使用說明</small><h3>品秩與本命分開查考</h3></div></header>
-    <div className="source-note-grid">
-      <div><b>本頁自動對照</b><p>只使用出生農曆年，查得天干靖、三元地支靖、六十甲子靖與本命心將。</p></div>
-      <div><b>不由生辰判定</b><p>上清、玉府、神霄等品秩與職銜，原典另列遷轉、功德與保舉規則（第 13–38 頁），不可由生日自動授予。</p></div>
-    </div>
-  </section>
-);
+const SourceNotesPanel=()=> <section className="source-notes no-print"><header><span className="report-mark">格</span><div><small>取用規則</small><h3>四柱各有用途，不混為一年</h3></div></header><div className="source-note-grid"><div><b>日柱是主要本命依據</b><p>圖片原文特別指出，元命真人應以日主查考，不可為方便而順便用年干支。</p></div><div><b>時柱用於壇靖治炁</b><p>雷壇、法靖與治炁依生時六十甲子表查得；寶庫則另以生年天干論。</p></div></div></section>;
 export default SourceNotesPanel;

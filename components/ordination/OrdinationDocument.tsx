@@ -1,22 +1,7 @@
-import React from 'react';
-import { OrdinationManager } from '../../hooks/useOrdinationManager.ts';
-const SourceBadge: React.FC<{ children: React.ReactNode }> = ({ children }) => <span className="source-badge">原典 {children}</span>;
-
-const OrdinationDocument: React.FC<{ manager: OrdinationManager }> = ({ manager: m }) => {
-  if (!m.result) return null;
-  const r = m.result;
-  return <article className="ordination-document"><div className="document-border">
-    <span className="corner corner-tl">✦</span><span className="corner corner-tr">✦</span><span className="corner corner-bl">✦</span><span className="corner corner-br">✦</span><div className="vertical-ribbon">神霄天壇玉格</div>
-    <header className="document-header"><span>原典本命對照</span><h1>本命玉格</h1><p>據掃描本逐頁校錄</p></header>
-    <div className="identity-block"><span className="eyebrow">民國 {r.rocYear} 年 · 西元 {r.gregorianYear} 年</span><h2>{r.ganzhi}年 · {r.yuan}</h2><div className="disciple"><small>本命資料</small><strong>{m.discipleName.trim() || '未具名'}</strong></div></div>
-    <section className="source-results">
-      <div className="source-card"><SourceBadge>第 1 頁</SourceBadge><small>天干靖 · {r.stem}干</small><strong>{r.stemJing}</strong></div>
-      <div className="source-card"><SourceBadge>第 1–2 頁</SourceBadge><small>海上三十六靖 · {r.yuan}{r.branch}支</small><strong>{r.branchJing}</strong></div>
-      <div className="source-card featured"><SourceBadge>第 5–9 頁</SourceBadge><small>六十甲子靖 · {r.ganzhi}</small><strong>{r.ganzhiJing}</strong></div>
-      <div className="source-card"><SourceBadge>第 49–50 頁</SourceBadge><small>法官所屬本命心將 · {r.branch}命</small><strong>{r.heartMarshal}</strong></div>
-    </section>
-    <section className="yuan-note"><div><small>三元推算依據</small><b>洪武十七年為上元甲子</b></div><p>依原典所記，以六十年為一元，按上元、中元、下元循環；本年落在第 {r.yuanIndex + 1} 元，故取「{r.yuan}」地支靖。</p></section>
-    <p className="document-disclaimer">此頁為原典條目查考，不等同授籙證明、職帖或宗教資格認定。</p>
-  </div></article>;
-};
-export default OrdinationDocument;
+import React from 'react'; import { OrdinationManager } from '../../hooks/useOrdinationManager.ts';
+const Card=({source,label,value,detail}:{source:string;label:string;value:string;detail?:string})=><div className="source-card"><span className="source-badge">取用 {source}</span><small>{label}</small><strong>{value}</strong>{detail&&<p>{detail}</p>}</div>;
+const OrdinationDocument:React.FC<{manager:OrdinationManager}>=({manager:m})=>{if(!m.result)return null;const r=m.result;return <article className="ordination-document"><div className="document-border"><div className="vertical-ribbon">新刊天壇玉格</div><header className="document-header"><span>完整四柱對照</span><h1>本命玉格</h1><p>年、月、日、時分項取用</p></header>
+  <div className="identity-block"><span className="eyebrow">農曆 {r.lunarMonth} 月 {r.lunarDay} 日</span><h2>{r.yearPillar}・{r.monthPillar}・{r.dayPillar}・{r.hourPillar}</h2><div className="disciple"><small>查考姓名</small><strong>{m.discipleName.trim()||'未具名'}</strong></div></div>
+  <section className="source-results bazi-results"><Card source="時柱" label="雷壇" value={r.hourAltar.altar}/><Card source="時柱" label="法靖與治炁" value={r.hourAltar.jing} detail={r.hourAltar.governance}/><Card source="日柱地支" label="元命真人" value={r.originPerson.star} detail={`${r.originPerson.palace}・姓 ${r.originPerson.surname}`}/><Card source="生年天干" label="本命所屬寶庫" value={r.treasury.treasury} detail={`${r.treasury.office}・庫官 ${r.treasury.official}`}/><Card source="生日天干" label="心將／恩將" value={`${r.heartMarshal}・${r.graceMarshal}`} detail="心將本身五行；恩將取生我之五行"/><Card source="生日地支" label="本命支將與撥兵" value={r.branchMarshal} detail={`兵馬 ${r.soldiers}`}/><Card source="農曆生日" label="道門師尊" value={r.daoMaster} detail={r.ceremonySeason}/><Card source="生日五行" label="五系所屬與三行六句" value={r.fiveSystem.deity} detail={`${r.fiveSystem.direction}・${r.fiveSystem.phrases.join('・')}`}/></section>
+  <p className="document-disclaimer">依您提供的《新刊天壇玉格》圖片第 5–9/51 頁校錄；元命真人以日主查考，不以生年替代。</p>
+</div></article>}; export default OrdinationDocument;

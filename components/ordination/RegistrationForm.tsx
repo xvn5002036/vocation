@@ -1,19 +1,9 @@
-import React from 'react';
-import { OrdinationManager } from '../../hooks/useOrdinationManager.ts';
-import Icon from '../ui/Icon.tsx';
-
-const RegistrationForm: React.FC<{ manager: OrdinationManager }> = ({ manager: m }) => (
-  <aside className="control-panel">
-    <div className="panel-heading"><span>本命資料</span><small>依《神霄天壇玉格》</small></div>
-    <section className="form-section"><label className="field-label" htmlFor="disciple-name">姓名（選填）</label><input id="disciple-name" className="text-input name-input" placeholder="供清冊辨識使用" value={m.discipleName} onChange={event => m.setDiscipleName(event.target.value)} /></section>
-    <section className="form-section date-section">
-      <div className="label-row"><label className="field-label" htmlFor="birth-year">出生農曆年份</label><span>{m.yearGanzhi.stem}{m.yearGanzhi.branch}年</span></div>
-      <div className="year-input-wrap"><span>民國</span><input id="birth-year" className="text-input year-input" type="number" min="1" max="300" value={m.lunarYear} onChange={event => m.setLunarYear(Number(event.target.value))} /><span>年</span></div>
-      <p className="field-help">以農曆年的干支為準；只需年份即可查得原典中的本命條目。</p>
-    </section>
-    <button className="primary-action" onClick={m.generate}>查詢本命玉格<Icon name="arrow"/></button>
-    {m.result && <button className="secondary-action" onClick={m.saveDisciple}>儲存至本機清冊</button>}
-    <p className="privacy-note">姓名與清冊只儲存在此裝置的瀏覽器</p>
-  </aside>
-);
-export default RegistrationForm;
+import React from 'react'; import { GANZHI_LIST } from '../../constants.tsx'; import { OrdinationManager } from '../../hooks/useOrdinationManager.ts'; import Icon from '../ui/Icon.tsx';
+const PillarSelect=({label,value,onChange}:{label:string;value:string;onChange:(v:string)=>void})=><label className="pillar-field"><span>{label}</span><select className="select" value={value} onChange={e=>onChange(e.target.value)}>{GANZHI_LIST.map(v=><option key={v}>{v}</option>)}</select></label>;
+const RegistrationForm:React.FC<{manager:OrdinationManager}>=({manager:m})=><aside className="control-panel">
+  <div className="panel-heading"><span>生辰八字</span><small>依排盤四柱輸入</small></div>
+  <section className="form-section"><label className="field-label" htmlFor="disciple-name">姓名（選填）</label><input id="disciple-name" className="text-input name-input" placeholder="供清冊辨識使用" value={m.discipleName} onChange={e=>m.setDiscipleName(e.target.value)}/></section>
+  <section className="form-section"><label className="field-label">四柱干支</label><div className="pillar-grid"><PillarSelect label="年柱" value={m.yearPillar} onChange={m.setYearPillar}/><PillarSelect label="月柱" value={m.monthPillar} onChange={m.setMonthPillar}/><PillarSelect label="日柱" value={m.dayPillar} onChange={m.setDayPillar}/><PillarSelect label="時柱" value={m.hourPillar} onChange={m.setHourPillar}/></div><p className="field-help">請依已完成的八字排盤選擇；系統不以年份代替其他三柱。</p></section>
+  <section className="form-section"><label className="field-label">農曆生日</label><div className="date-grid two-date"><label><span>月份</span><select className="select" value={m.lunarMonth} onChange={e=>m.setLunarMonth(Number(e.target.value))}>{Array.from({length:12},(_,i)=>i+1).map(v=><option key={v} value={v}>{v} 月</option>)}</select></label><label><span>日期</span><select className="select" value={m.lunarDay} onChange={e=>m.setLunarDay(Number(e.target.value))}>{Array.from({length:30},(_,i)=>i+1).map(v=><option key={v} value={v}>{v} 日</option>)}</select></label></div></section>
+  <button className="primary-action" onClick={m.generate}>依八字查考玉格<Icon name="arrow"/></button>{m.result&&<button className="secondary-action" onClick={m.saveDisciple}>儲存至本機清冊</button>}<p className="privacy-note">資料只儲存在此裝置的瀏覽器</p>
+</aside>; export default RegistrationForm;
