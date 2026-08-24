@@ -19,7 +19,7 @@ export const YEAR_ALTAR_MAP:Record<string,AltarEntry>={
   癸丑:a('百神集應','真光變化','赫上治右都監炁'),癸卯:a('玄妙應真','與聖合真','葛瑞治左都領炁'),癸巳:a('玉堂靜玄','攝真召靈','平蓋治右領功炁'),癸未:a('百神集應','元超虛真','主簿治右貢炁'),癸酉:a('玄妙應真','清虛自然','後城治右都炁'),癸亥:a('玉堂靜玄','通真會元','涌泉治左監神炁')
 };
 
-/** 圖片第 7/51 頁：元命真人以生日地支論，原文並警示不可順便用年定。 */
+/** 「十二生肖本命星君」對照圖：依出生年生肖（生年地支）查本命星君。 */
 export const ORIGIN_PERSON_MAP:Record<EarthlyBranch,OriginPerson>={
   子:{star:'貪狼星君',palace:'太上宮・天樞',surname:'徐'},丑:{star:'巨門星君',palace:'中元宮・天璇',surname:'張'},亥:{star:'巨門星君',palace:'中元宮・天璇',surname:'張'},
   寅:{star:'祿存星君',palace:'真元宮・天璣',surname:'葉'},戌:{star:'祿存星君',palace:'真元宮・天璣',surname:'葉'},卯:{star:'文曲星君',palace:'紐幽宮・天權',surname:'許'},酉:{star:'文曲星君',palace:'紐幽宮・天權',surname:'許'},
