@@ -1,5 +1,5 @@
 import { Lunar, LunarYear } from 'lunar-javascript';
-import { BRANCH_MARSHAL, ELEMENT_MARSHAL, FIVE_SYSTEM_MAP, FULL_MARSHAL_MAP, GENERATING_ELEMENT, HOUR_AUTHORITY_MAP, HOUR_VOCATION_MAP, MOUNTAIN_MAP, ORIGIN_PERSON_MAP, QI_TITLE_MAP, SOLDIERS_MAP, STEM_ELEMENT, TREASURY_MAP, YEAR_ALTAR_MAP } from './constants.tsx';
+import { BRANCH_MARSHAL, ELEMENT_MARSHAL, FIVE_SYSTEM_MAP, FULL_MARSHAL_MAP, GENERATING_ELEMENT, HOUR_VOCATION_MAP, MOUNTAIN_MAP, ORIGIN_PERSON_MAP, QI_TITLE_MAP, SOLDIERS_MAP, STEM_ELEMENT, TREASURY_MAP, YEAR_ALTAR_MAP } from './constants.tsx';
 import { EarthlyBranch, HeavenlyStem, JadeRegistryResult } from './types.ts';
 
 export const pillarStem=(pillar:string)=>pillar[0] as HeavenlyStem;
@@ -39,7 +39,7 @@ export const calculateJadeRegistry=(input:{rocYear:number;lunarMonth:number;luna
   const yearStem=pillarStem(pillars.yearPillar); const yearBranch=pillarBranch(pillars.yearPillar); const dayStem=pillarStem(pillars.dayPillar); const dayBranch=pillarBranch(pillars.dayPillar);
   const element=STEM_ELEMENT[dayStem];
   const yearAltar=YEAR_ALTAR_MAP[pillars.yearPillar]; const daoMaster=getDaoMaster(input.lunarMonth,input.lunarDay); const fiveSystem=FIVE_SYSTEM_MAP[element];
-  const hourVocation=HOUR_VOCATION_MAP[input.hourBranch]; const hourAuthority=HOUR_AUTHORITY_MAP[input.hourBranch]; const qiTitle=QI_TITLE_MAP[element]; const mountain=MOUNTAIN_MAP[element]; const fullMarshal=FULL_MARSHAL_MAP[element];
+  const hourVocation=HOUR_VOCATION_MAP[input.hourBranch]; const hourAuthority='三界便宜事'; const qiTitle=QI_TITLE_MAP[element]; const mountain=MOUNTAIN_MAP[element]; const fullMarshal=FULL_MARSHAL_MAP[STEM_ELEMENT[yearStem]];
   const ordinationLines=[`一奏受太上三五都功經籙${hourVocation}`,`一補充知天曹紀錄司兼${hourAuthority}`,`一奏立${yearAltar.altar}${yearAltar.jing}`,`一泰玄都省正一平炁宮係天師${yearAltar.governance}`,`${qiTitle}元命應${daoMaster}`,`${mountain}${fiveSystem.deity}`,`一奏撥${fullMarshal}麾下`];
   return {...input,...pillars,yearAltar,hourVocation,hourAuthority,qiTitle,mountain,fullMarshal,ordinationLines,originPerson:ORIGIN_PERSON_MAP[yearBranch],treasury:TREASURY_MAP[yearStem],heartMarshal:ELEMENT_MARSHAL[element],graceMarshal:ELEMENT_MARSHAL[GENERATING_ELEMENT[element]],branchMarshal:BRANCH_MARSHAL[dayBranch],soldiers:SOLDIERS_MAP[dayBranch],daoMaster,ceremonySeason:getCeremonySeason(input.lunarMonth),fiveSystem};
 };

@@ -34,7 +34,6 @@ export const TREASURY_MAP:Record<HeavenlyStem,TreasuryEntry>={
 export const ELEMENT_MARSHAL:Record<string,string>={木:'溫元帥',火:'馬元帥',土:'殷元帥',金:'趙元帥',水:'周元帥'};
 export const FULL_MARSHAL_MAP:Record<string,string>={木:'地祇主令都巡太保溫元帥',火:'斗口靈官馬元帥',土:'地司太歲武光上將殷元帥',金:'上清正一龍虎執法趙元帥',水:'風輪蕩魔收怪滅邪周元帥'};
 export const HOUR_VOCATION_MAP:Record<EarthlyBranch,string>={子:'鳳閣司籍仙官',丑:'彤華公案仙官',寅:'紫微校錄仙官',卯:'青城典籍仙官',辰:'天官校籍仙官',巳:'玉府執法仙官',午:'玄樞奏議仙官',未:'蓬萊定旨仙官',申:'紫府掌善仙官',酉:'太華司命仙官',戌:'集靈司功仙官',亥:'凝真紀錄仙官'};
-export const HOUR_AUTHORITY_MAP:Record<EarthlyBranch,string>={子:'三界糾察便宜事',丑:'三界勘合便宜事',寅:'三界行移便宜事',卯:'三界點檢便宜事',辰:'三界推問便宜事',巳:'三界通傳便宜事',午:'三界執法便宜事',未:'三界理問便宜事',申:'三界便宜事',酉:'三界收管便宜事',戌:'三界點視便宜事',亥:'三界密察便宜事'};
 export const QI_TITLE_MAP:Record<string,string>={木:'九炁君青天三五步罡',火:'三炁君赤天三五步罡',土:'一炁君黃天三五步罡',金:'七炁君白天三五步罡',水:'五炁君黑天三五步罡'};
 export const MOUNTAIN_MAP:Record<string,string>={木:'東嶽',火:'南嶽',土:'中嶽',金:'西嶽',水:'北嶽'};
 export const STEM_ELEMENT:Record<HeavenlyStem,string>={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
