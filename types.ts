@@ -5,9 +5,12 @@ export interface OriginPerson { star: string; palace: string; surname: string; }
 export interface TreasuryEntry { treasury: string; office: string; official: string; }
 export interface FiveSystemEntry { direction: string; deity: string; phrases: [string,string,string]; }
 export interface JadeRegistryResult {
+  rocYear: number; solarDate: string; isLeapMonth: boolean; hourBranch: EarthlyBranch;
   yearPillar: string; monthPillar: string; dayPillar: string; hourPillar: string;
   lunarMonth: number; lunarDay: number;
-  hourAltar: AltarEntry;
+  yearAltar: AltarEntry;
+  hourVocation: string; hourAuthority: string; qiTitle: string; mountain: string; fullMarshal: string;
+  ordinationLines: string[];
   originPerson: OriginPerson;
   treasury: TreasuryEntry;
   heartMarshal: string; graceMarshal: string; branchMarshal: string;

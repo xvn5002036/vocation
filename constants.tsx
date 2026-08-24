@@ -5,8 +5,8 @@ export const BRANCHES: EarthlyBranch[]=['子','丑','寅','卯','辰','巳','午
 export const GANZHI_LIST=Array.from({length:60},(_,i)=>`${STEMS[i%10]}${BRANCHES[i%12]}`);
 const a=(altar:string,jing:string,governance:string):AltarEntry=>({altar:`${altar}壇`,jing:`${jing}靖`,governance});
 
-/** 圖片第 5–7/51 頁：奏職雷壇法靖，依生時四柱查壇、靖、治炁。 */
-export const HOUR_ALTAR_MAP:Record<string,AltarEntry>={
+/** 圖片第 5–7/51 頁：奏職雷壇法靖，依生年六十甲子查壇、靖、治炁。 */
+export const YEAR_ALTAR_MAP:Record<string,AltarEntry>={
   甲子:a('靈真應妙','通玄致真','陽平治左平炁'),甲寅:a('神化通玄','體真會道','庚除治右都領炁'),甲辰:a('雷霆應化','靈虛自然','陽平治左平炁'),甲午:a('靈真應妙','成真集靈','北邙治右察炁'),甲申:a('神妙通玄','清真正性','蒙秦治左領功炁'),甲戌:a('雷霆應化','致真通玄','真多治右領神炁'),
   乙丑:a('靈應通真','復性澄真','真多治右領神炁'),乙卯:a('三界混玄','法天成真','鹿堂治右平炁'),乙巳:a('玉堂贊化','契真保元','太竹治右監察炁'),乙未:a('靈應通真','制魔澄真','主簿治右貢炁'),乙酉:a('三界混元','澄性成真','濃口治右監貢炁'),乙亥:a('玉堂贊化','降真集靈','北平治左監察炁'),
   丙子:a('飛捷報應','混玄致真','涌泉治左察神炁'),丙寅:a('應妙合英','通真澄化','庚除治右都領炁'),丙辰:a('靈一守玄','育神煉真','滴沅治右長炁'),丙午:a('飛捷報應','澄心得真','北邙治右察炁'),丙申:a('應妙合英','通真會應','公慕治右都炁'),丙戌:a('靈一守玄','保真湛然','蒙秦治左領炁'),
@@ -32,6 +32,11 @@ export const TREASURY_MAP:Record<HeavenlyStem,TreasuryEntry>={
 };
 
 export const ELEMENT_MARSHAL:Record<string,string>={木:'溫元帥',火:'馬元帥',土:'殷元帥',金:'趙元帥',水:'周元帥'};
+export const FULL_MARSHAL_MAP:Record<string,string>={木:'地祇主令都巡太保溫元帥',火:'斗口靈官馬元帥',土:'地司太歲武光上將殷元帥',金:'上清正一龍虎執法趙元帥',水:'風輪蕩魔收怪滅邪周元帥'};
+export const HOUR_VOCATION_MAP:Record<EarthlyBranch,string>={子:'鳳閣司籍仙官',丑:'彤華公案仙官',寅:'紫微校錄仙官',卯:'青城典籍仙官',辰:'天官校籍仙官',巳:'玉府執法仙官',午:'玄樞奏議仙官',未:'蓬萊定旨仙官',申:'紫府掌善仙官',酉:'太華司命仙官',戌:'集靈司功仙官',亥:'凝真紀錄仙官'};
+export const HOUR_AUTHORITY_MAP:Record<EarthlyBranch,string>={子:'三界糾察便宜事',丑:'三界勘合便宜事',寅:'三界行移便宜事',卯:'三界點檢便宜事',辰:'三界推問便宜事',巳:'三界通傳便宜事',午:'三界執法便宜事',未:'三界理問便宜事',申:'三界便宜事',酉:'三界收管便宜事',戌:'三界點視便宜事',亥:'三界密察便宜事'};
+export const QI_TITLE_MAP:Record<string,string>={木:'九炁君青天三五步罡',火:'三炁君赤天三五步罡',土:'一炁君黃天三五步罡',金:'七炁君白天三五步罡',水:'五炁君黑天三五步罡'};
+export const MOUNTAIN_MAP:Record<string,string>={木:'東嶽',火:'南嶽',土:'中嶽',金:'西嶽',水:'北嶽'};
 export const STEM_ELEMENT:Record<HeavenlyStem,string>={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
 export const GENERATING_ELEMENT:Record<string,string>={木:'水',火:'木',土:'火',金:'土',水:'金'};
 export const BRANCH_MARSHAL:Record<EarthlyBranch,string>={子:'辛元帥',丑:'鄧元帥',寅:'趙元帥',卯:'張元帥',辰:'魯元帥',巳:'馬元帥',午:'王元帥',未:'殷元帥',申:'溫元帥',酉:'康元帥',戌:'成元帥',亥:'方元帥'};
