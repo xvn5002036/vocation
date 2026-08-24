@@ -2,7 +2,7 @@ import { useCallback,useEffect,useMemo,useState } from 'react';
 import { EarthlyBranch,JadeRegistryResult,PersonnelRecord } from '../types.ts';
 import { calculateJadeRegistry,getLunarMonthDays,getLunarYearInfo } from '../utils.ts';
 
-export type View='generate'|'list';
+export type View='generate'|'intro'|'list';
 export type Notice={message:string;kind:'success'|'error'}|null;
 const STORAGE_KEY='shenxiao_bazi_registry_v3';
 
