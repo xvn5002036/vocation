@@ -2,7 +2,7 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# 龍虎山正一授籙管理系統
+# 《神霄天壇玉格》本命查考
 
 公開網站：https://xvn5002036.github.io/vocation/
 
@@ -13,9 +13,13 @@
 - `components/layout/SiteHeader.tsx`：上層導覽與頁面超連結
 - `pages/`：中層頁面內容，每個頁面各自獨立
 - `components/layout/SiteFooter.tsx`：下層頁腳
-- `components/ordination/`：錄籍頁內的表單、職牒與報號元件
+- `components/ordination/`：本命表單、原典結果與使用說明元件
 - `hooks/useOrdinationManager.ts`：資料與操作邏輯
 - `styles/`：基礎、版面、錄籍、清冊及響應式樣式分檔
+
+## 內容依據
+
+網站依提供的《神霄天壇玉格》50 頁掃描本校錄，現階段提供天干靖、三元地支靖、六十甲子靖與本命心將查考。品秩與職銜不由生辰自動判定。
 
 ## Run Locally
 
