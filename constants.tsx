@@ -1,4 +1,4 @@
-import { AltarEntry, EarthlyBranch, FiveSystemEntry, HeavenlyStem, OriginPerson, TreasuryEntry } from './types.ts';
+import { AltarEntry, EarthlyBranch, FiveElement, FiveSystemEntry, HeavenlyStem, OriginPerson, TreasuryEntry } from './types.ts';
 
 export const STEMS: HeavenlyStem[]=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 export const BRANCHES: EarthlyBranch[]=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
@@ -36,7 +36,8 @@ export const FULL_MARSHAL_MAP:Record<string,string>={木:'地祇主令都巡太�
 export const HOUR_VOCATION_MAP:Record<EarthlyBranch,string>={子:'鳳閣司籍仙官',丑:'彤華公案仙官',寅:'紫微校錄仙官',卯:'青城典籍仙官',辰:'天官校籍仙官',巳:'玉府執法仙官',午:'玄樞奏議仙官',未:'蓬萊定旨仙官',申:'紫府掌善仙官',酉:'太華司命仙官',戌:'集靈司功仙官',亥:'凝真紀錄仙官'};
 export const QI_TITLE_MAP:Record<string,string>={木:'九炁君青天三五步罡',火:'三炁君赤天三五步罡',土:'一炁君黃天三五步罡',金:'七炁君白天三五步罡',水:'五炁君黑天三五步罡'};
 export const MOUNTAIN_MAP:Record<string,string>={木:'東嶽',火:'南嶽',土:'中嶽',金:'西嶽',水:'北嶽'};
-export const STEM_ELEMENT:Record<HeavenlyStem,string>={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+export const STEM_ELEMENT:Record<HeavenlyStem,FiveElement>={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+export const BRANCH_ELEMENT:Record<EarthlyBranch,FiveElement>={子:'水',亥:'水',寅:'木',卯:'木',巳:'火',午:'火',申:'金',酉:'金',辰:'土',戌:'土',丑:'土',未:'土'};
 export const GENERATING_ELEMENT:Record<string,string>={木:'水',火:'木',土:'火',金:'土',水:'金'};
 export const BRANCH_MARSHAL:Record<EarthlyBranch,string>={子:'辛元帥',丑:'鄧元帥',寅:'趙元帥',卯:'張元帥',辰:'魯元帥',巳:'馬元帥',午:'王元帥',未:'殷元帥',申:'溫元帥',酉:'康元帥',戌:'成元帥',亥:'方元帥'};
 export const SOLDIERS_MAP:Record<EarthlyBranch,string>={子:'一萬三千零五十名',丑:'七萬一千名',寅:'一萬一千名',卯:'三百八十名',辰:'一千四百七十名',巳:'七百名',午:'一千名',未:'十萬名',申:'一萬名',酉:'三萬名',戌:'八千名',亥:'五百名'};

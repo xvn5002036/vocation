@@ -1,5 +1,6 @@
 export type HeavenlyStem = '甲'|'乙'|'丙'|'丁'|'戊'|'己'|'庚'|'辛'|'壬'|'癸';
 export type EarthlyBranch = '子'|'丑'|'寅'|'卯'|'辰'|'巳'|'午'|'未'|'申'|'酉'|'戌'|'亥';
+export type FiveElement = '木'|'火'|'土'|'金'|'水';
 export interface AltarEntry { altar: string; jing: string; governance: string; }
 export interface OriginPerson { star: string; palace: string; surname: string; }
 export interface TreasuryEntry { treasury: string; office: string; official: string; }
@@ -15,6 +16,7 @@ export interface JadeRegistryResult {
   treasury: TreasuryEntry;
   heartMarshal: string; graceMarshal: string; branchMarshal: string;
   soldiers: string; daoMaster: string; ceremonySeason: string;
-  fiveSystem: FiveSystemEntry;
+  fiveSystem: FiveSystemEntry; dominantElement: FiveElement;
+  fiveElementCounts: Record<FiveElement,number>;
 }
 export interface PersonnelRecord extends JadeRegistryResult { id: string; name: string; lunarInfo: string; }
